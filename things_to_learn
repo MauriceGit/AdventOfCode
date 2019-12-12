@@ -1,0 +1,12 @@
+
+Libaries and Python tricks to learn for better efficiency next time!
+
+-   Counter()
+    from collections import Counter
+    Used in: 04_short and 08_alternative.
+    Easy filtering and counting of values in lists.
+-   NetworkX
+    import networkx as nx
+    used in: 06_alternative
+    Can be used for any kind of graph problem. Can easily solve most graph related issues if
+    familiar with the library!
