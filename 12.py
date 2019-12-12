@@ -1,16 +1,10 @@
 import re
-from itertools import combinations, permutations
 from recordtype import recordtype
-import time
-import copy
 from fractions import gcd
 from collections import defaultdict
 
 def add(a,b):
     return (a[0]+b[0], a[1]+b[1], a[2]+b[2])
-
-def mul(a,f):
-    return (a[0]*f, a[1]*f, a[2]*f)
 
 # compare like in C. -1, 0, 1
 def cmp(x1, x2):
@@ -25,14 +19,6 @@ def energy(t):
 def tot_energy(p):
     # potential * kinetic
     return energy(p.p) * energy(p.v)
-
-def to_hashable(p):
-    return (p.p, p.v)
-
-
-# Checks how many times l is a subset of l2
-def subset_cnt(l, l2):
-    return len(list(filter(lambda x: x != -1, [i if l[i:i+len(l2)] == l2 else -1 for i in range(len(l)-len(l2))])))
 
 def update_planets(planets):
     # Update velocity
@@ -62,15 +48,15 @@ if __name__ == "__main__":
 
 
         # let's just assume, that a cycle is a minimum of 50 individual calculated steps...
+        # This is a really hacky solution with an explicit n!
         n = 50
 
         first_n_hash = dict()
         last_n_coordinate_values = defaultdict(list)
         cycle_times_per_coordinate = dict()
 
-
         i = 0
-        while(True):
+        while(len(cycle_times_per_coordinate) < 3):
 
             if i == n:
                 first_n_hash["x"] = hash(tuple(last_n_coordinate_values["x"]))
@@ -94,10 +80,6 @@ if __name__ == "__main__":
             last_n_coordinate_values["y"].append(planets[0].p[1])
             last_n_coordinate_values["z"].append(planets[0].p[2])
 
-            # we found all cycle times.
-            if len(cycle_times_per_coordinate) == 3:
-                break
-
             if i == 1000:
                 # solution to puzzle 1:
                 print(sum(map(tot_energy, planets)))
@@ -107,6 +89,8 @@ if __name__ == "__main__":
             i += 1
 
         # Solution to puzzle 2:
+        # yes, we ignore the velocity cycles at the moment. But it seems, they
+        # match the lcm we calculate right now. So no point in checking.
         x = cycle_times_per_coordinate["x"]
         y = cycle_times_per_coordinate["y"]
         z = cycle_times_per_coordinate["z"]
