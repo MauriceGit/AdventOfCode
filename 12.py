@@ -96,3 +96,6 @@ if __name__ == "__main__":
         z = cycle_times_per_coordinate["z"]
         # least common multiple for all three coordinates!
         print(lcm(lcm(x,y), lcm(x,z)))
+
+# solution for 12.01: 6735
+# solution for 12.02: 326489627728984
