@@ -1,13 +1,7 @@
 from intcode import IntCode
-from collections import defaultdict
 
 def split(l, n):
     return [l[i:i+n] for i in range(0, len(l), n)]
-
-def sub(a,b):
-    return (b[0]-a[0], b[1]-a[1])
-def add(a,b):
-    return (a[0]+b[0], a[1]+b[1])
 
 def draw(f):
     min_x = min(f.keys(), key=lambda x: x[0])[0]
@@ -37,7 +31,7 @@ if __name__ == "__main__":
 
     game = IntCode(data)
     states = game.get_outputs()
-    field = defaultdict(int)
+    field = dict()
 
     ball_pos_x = 0
     last_js_x = 0
