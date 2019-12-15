@@ -6,7 +6,7 @@ class IntCode:
         self.inputs = []
         self.outputs = []
         self.all_outputs = []
-        self.data = defaultdict(int, enumerate(data))
+        self.data = defaultdict(int, enumerate(data[:]))
         self.finished = False
         self.current_index = 0
         self.errors = []
@@ -80,6 +80,10 @@ class IntCode:
             else:
                 self.errors.append("ERROR - unknown op code")
                 return
+
+    def set_input(self, input_value):
+        self.inputs.append(input_value)
+        self._run()
 
     def set_inputs(self, input_list):
         self.inputs.extend(input_list)
