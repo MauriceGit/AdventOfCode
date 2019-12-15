@@ -9,8 +9,8 @@ def draw(f):
     max_x = max(f.keys(), key=lambda x: x[0])[0]
     max_y = max(f.keys(), key=lambda x: x[1])[1]
 
-    for y in range(min_y, max_y):
-        for x in range(min_x, max_x):
+    for y in range(min_y, max_y+1):
+        for x in range(min_x, max_x+1):
             if f[(x,y)] == 0:
                 print(" ", end="")
             elif f[(x,y)] == 1:
