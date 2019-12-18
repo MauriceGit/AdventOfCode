@@ -10,66 +10,6 @@ def score(p, f):
         return p[0]*p[1]
     return 0
 
-
-def find_sublists():
-    l = 'R8R8R4R4R8L6L2R4R4R8R8R8L6L2'
-
-    #for i in range(0, len(l), 2):
-    for i in range(1):
-        l2 = l[:]
-        a = l2[:i]
-
-        a = "R8R8"
-
-        if a == "":
-            continue
-
-
-
-        #print("a = {}".format(a))
-        l2 = l2.replace(a, "A")
-
-
-
-        for j in range(0, len(l2), 2):
-            l3 = l2[:]
-
-            while len(l3) > 0 and l3[0] in "ABC":
-                l3 = l3[1:]
-
-            print(l3)
-
-            b = l3[:j]
-            if "-" in b:
-                break
-            if b == "":
-                continue
-
-            print("  b = {}".format(b))
-            l3 = l3.replace(b, "B")
-            for k in range(0, len(l3), 2):
-                l4 = l3[:]
-
-                while len(l4) > 0 and l4[0] in "ABC":
-                    l4 = l4[1:]
-
-                c = l4[:k]
-                if "-" in c:
-                    break
-                if c == "":
-                    continue
-                print("    c = {}".format(c))
-                l4 = l4.replace(c, "C")
-
-                print("      ", l4)
-
-                if all(list(map(lambda x: x in "ABC", l4))):
-                    print("FOUND: a = {}, b = {}, c = {}".format(a,b,c))
-                    print("  --> {}".format(l[:].replace(a, "A").replace(b, "B").replace(c, "C")))
-
-
-
-
 def combinations(l):
     out = []
     for n in range(2, len(l)+1, 2):
@@ -83,26 +23,32 @@ def filter_invalid(l):
     return list(filter(lambda x: all(e not in x for e in "-ABC"), l))
 
 
-def check_sublists(l, c, sublists):
+def find_sublists(l, c, sublists):
 
     if c > 4:
         return False, []
 
+    # Only substituted characters left...
     if all(list(map(lambda x: x in "-ABC", l))):
 
         if len(l) <= 20 and all(map(lambda x: len(x) <= 10, sublists)):
-            #print("found: {} - {}".format(sublists, l))
             return True, sublists
 
         return False, []
 
-    for p in filter_invalid(combinations(l)):
-        l2 = l[:]
-        l2 = l2.replace(p, "-A" if c == 1 else "-B" if c == 2 else "-C")
+    if c > 3:
+        return False, []
 
-        b, sl = check_sublists(l2, c+1, sublists + [p])
+    for p in filter_invalid(combinations(l)):
+
+        # two characters so the alignment works.
+        l2 = l.replace(p, "-A" if c == 1 else "-B" if c == 2 else "-C")
+
+        b, sl = find_sublists(l2, c+1, sublists + [p])
+        # and early return.
         if b:
             return True, sl
+
     return False, []
 
 if __name__ == "__main__":
@@ -132,10 +78,8 @@ if __name__ == "__main__":
 
     data[0] = 2
 
-    #find_sublists()
-
     l = 'R8R8R4R4R8L6L2R4R4R8R8R8L6L2'
-    b, sl = check_sublists(l, 1, [])
+    b, sl = find_sublists(l, 1, [])
 
     print(sl)
 
