@@ -4,8 +4,6 @@ def draw(f, symbols=None):
     if symbols == None:
         symbols = {-1: "█", 0: "█", 1: " ", 2: "0", 3: "#", 4: "X"}
 
-    print(symbols)
-
     min_x = min(f.keys(), key=lambda x: x[0])[0]
     min_y = min(f.keys(), key=lambda x: x[1])[1]
     max_x = max(f.keys(), key=lambda x: x[0])[0]
