@@ -11,16 +11,14 @@ def score(p, f):
     return 0
 
 def combinations(l):
-    out = []
     for n in range(2, len(l)+1, 2):
         for i in range(0, len(l), 2):
             a = l[i:i+n]
             if len(a) == n:
-                out.append(a)
-    return out
+                yield a
 
 def filter_invalid(l):
-    return list(filter(lambda x: all(e not in x for e in "-ABC"), l))
+    return filter(lambda x: all(e not in x for e in "-ABC"), l)
 
 
 def find_sublists(l, c, sublists):
