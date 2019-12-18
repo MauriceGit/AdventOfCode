@@ -24,4 +24,3 @@ def draw(f, symbols=None):
             print(symbols[c], end="")
 
         print("")
-
