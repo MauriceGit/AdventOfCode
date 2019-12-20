@@ -143,16 +143,46 @@ def get_valid_neighbors(graph, p_to_c, node, blocked_nodes, remaining_keys, last
     return neighbor_nodes
 
 
+# Get list of neighbors that have not yet been visited!
+# So no used key fields, no opened doors, no @.
+def get_valid_neighbors2(graph, p_to_c, node, blocked_nodes, remaining_keys, last_nodes=set(), weight=0):
+
+
+    neighbor_nodes = []
+    for e in graph.edges(node, data=True):
+
+        # (x,y)
+        n_p = e[1]
+        # 'c'
+        n_c = p_to_c[n_p]
+
+        # do not go back here!
+        if n_p in last_nodes:
+            #print("      been here")
+            continue
+        # valid node, if it is a key we've not yet picked up!
+        if n_c in remaining_keys:
+            #print("      Nice.")
+            #print("from {} found node {}".format(p_to_c[node], n_c))
+            neighbor_nodes.append((e, weight+e[2]["weight"]))
+            continue
+        # cannot go to blocked nodes yet
+        if n_c in blocked_nodes:
+            #print("      blocked")
+            continue
+
+        neighbor_nodes.extend(get_valid_neighbors2(graph, p_to_c, n_p, blocked_nodes, remaining_keys, last_nodes.union({node}), weight+e[2]["weight"]))
+
+    return neighbor_nodes
+
+
 def path_length_bfs(graph, p_to_c, node, blocked_nodes, remaining_keys):
-
-
 
     # (path, score, node, blocked_nodes, remaining_keys)
     queue = [([], 0, node, blocked_nodes, remaining_keys)]
     solutions = []
 
     while len(queue) > 0:
-        #print(queue)
 
         new_queue = []
         for q in queue:
@@ -166,16 +196,17 @@ def path_length_bfs(graph, p_to_c, node, blocked_nodes, remaining_keys):
             remaining_keys = q[4]
 
             if len(remaining_keys - {p_to_c[node]}) == 0:
-                solutions.append((path, score))
+                solutions.append((path+[node], score))
                 #print(solutions)
                 continue
 
-            neighbors = get_valid_neighbors(graph, p_to_c, node, blocked_nodes-{p_to_c[node].upper()}, remaining_keys-{p_to_c[node]})
-            print(neighbors)
-            for e in neighbors:
-                w = e[2]["weight"]
-                new_queue.append(([e[0]]+path, score+w, e[1], blocked_nodes-{p_to_c[node].upper()}, remaining_keys-{p_to_c[node]}))
-                #print("New entry for {} --> {}".format(e, new_queue[-1]))
+            new_blocked_nodes  = blocked_nodes-{p_to_c[node].upper()}
+            new_remaining_keys = remaining_keys-{p_to_c[node]}
+
+            neighbors = get_valid_neighbors2(graph, p_to_c, node, new_blocked_nodes, new_remaining_keys)
+            #print("    ", neighbors)
+            for e, w in neighbors:
+                new_queue.append((path+[node], score+w, e[1], new_blocked_nodes, new_remaining_keys))
 
 
         queue = new_queue
@@ -223,11 +254,10 @@ def main():
                 if len(path) > 1 and not new_graph.has_edge(path[0], path[-1]) and all([p not in special_nodes for p in path[1:-1]]):
                     new_graph.add_edge(path[0], path[-1], weight=len(path)-1)
 
-
         graph = None
 
         for s in special:
-            new_graph.node[special[s]]["is_door"] = s == s.upper() and s != "@"
+            new_graph.nodes[special[s]]["is_door"] = s == s.upper() and s != "@"
 
 
         blocked_nodes  = set(filter(lambda x: x == x.upper() and x != "@", special.keys()))
