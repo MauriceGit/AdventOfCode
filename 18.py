@@ -1,7 +1,7 @@
 import networkx as nx
 from utility import add_p
 import matplotlib.pyplot as plt
-
+from collections import defaultdict
 
 def add_edge(graph, p, d):
     if add_p(p, d) in graph:
@@ -61,14 +61,17 @@ def path_length(graph, special, pos):
 
 
 
-def path_length_2(graph, p_to_c, last_node, node, blocked_nodes, remaining_keys):
+def path_length_dfs(graph, p_to_c, last_node, node, blocked_nodes, remaining_keys, already_visited):
 
     if len(remaining_keys - {p_to_c[node]}) == 0:
         return [], 0
 
+    if (last_node, node) in already_visited:
+        return [], 100000000000000000
+
     is_door = graph.node[node]["is_door"]
 
-    print("calc length for node: {} with keys: {} ".format(node, remaining_keys))
+    #print("calc length for node: {} with keys: {} ".format(node, remaining_keys))
 
 
     min_dist = 100000000000000000
@@ -94,8 +97,7 @@ def path_length_2(graph, p_to_c, last_node, node, blocked_nodes, remaining_keys)
             if not is_door and p_to_c[e[0]] != "@" and p_to_c[e[0]] not in remaining_keys and e[1] == last_node:
                 continue
 
-
-            path, score = path_length_2(graph, p_to_c, e[0], e[1], blocked_nodes - {p_to_c[e[0]].upper()}, remaining_keys - {p_to_c[e[0]]})
+            path, score = path_length_dfs(graph, p_to_c, e[0], e[1], blocked_nodes - {p_to_c[e[0]].upper()}, remaining_keys - {p_to_c[e[0]]}, already_visited.union({(last_node, node)}))
 
             w = e[2]["weight"]
             if score + w < min_dist:
@@ -104,10 +106,88 @@ def path_length_2(graph, p_to_c, last_node, node, blocked_nodes, remaining_keys)
 
     return min_path, min_dist
 
+# Get list of neighbors that have not yet been visited!
+# So no used key fields, no opened doors, no @.
+def get_valid_neighbors(graph, p_to_c, node, blocked_nodes, remaining_keys, last_nodes=set()):
+
+
+    #print("    last_nodes: {}".format(last_nodes))
+
+    neighbor_nodes = []
+    for e in graph.edges(node, data=True):
+
+
+        #print("    try: {}".format(e))
+
+        # (x,y)
+        n_p = e[1]
+        # 'c'
+        n_c = p_to_c[n_p]
+
+        # do not go back here!
+        if n_p in last_nodes:
+            #print("      been here")
+            continue
+        # valid node, if it is a key we've not yet picked up!
+        if n_c in remaining_keys:
+            #print("      Nice.")
+            neighbor_nodes.append(e)
+            continue
+        # cannot go to blocked nodes yet
+        if n_c in blocked_nodes:
+            #print("      blocked")
+            continue
+
+        neighbor_nodes.extend(get_valid_neighbors(graph, p_to_c, n_p, blocked_nodes, remaining_keys, last_nodes.union({node})))
+
+    return neighbor_nodes
+
+
+def path_length_bfs(graph, p_to_c, node, blocked_nodes, remaining_keys):
 
 
 
-if __name__ == "__main__":
+    # (path, score, node, blocked_nodes, remaining_keys)
+    queue = [([], 0, node, blocked_nodes, remaining_keys)]
+    solutions = []
+
+    while len(queue) > 0:
+        #print(queue)
+
+        new_queue = []
+        for q in queue:
+
+            #print(q)
+
+            path = q[0]
+            score = q[1]
+            node = q[2]
+            blocked_nodes = q[3]
+            remaining_keys = q[4]
+
+            if len(remaining_keys - {p_to_c[node]}) == 0:
+                solutions.append((path, score))
+                #print(solutions)
+                continue
+
+            neighbors = get_valid_neighbors(graph, p_to_c, node, blocked_nodes-{p_to_c[node].upper()}, remaining_keys-{p_to_c[node]})
+            print(neighbors)
+            for e in neighbors:
+                w = e[2]["weight"]
+                new_queue.append(([e[0]]+path, score+w, e[1], blocked_nodes-{p_to_c[node].upper()}, remaining_keys-{p_to_c[node]}))
+                #print("New entry for {} --> {}".format(e, new_queue[-1]))
+
+
+        queue = new_queue
+
+
+    #print("Final solutions: {}".format(solutions))
+    return sorted(solutions, key=lambda x: x[1])[0]
+
+
+def main():
+
+
 
     with open("18.data", "r") as f:
 
@@ -156,7 +236,8 @@ if __name__ == "__main__":
         #print("blocked nodes : {}".format(blocked_nodes))
         #print("remaining keys: {}".format(remaining_keys))
 
-        path, score = path_length_2(new_graph, special_nodes, special["@"], special["@"], blocked_nodes, remaining_keys)
+        #path, score = path_length_dfs(new_graph, special_nodes, special["@"], special["@"], blocked_nodes, remaining_keys, set())
+        path, score = path_length_bfs(new_graph, special_nodes, special["@"], blocked_nodes, remaining_keys)
 
         print(score)
         print(list(map(lambda x: special_nodes[x], path)))
@@ -172,6 +253,9 @@ if __name__ == "__main__":
         #print(step_count(graph, special, (21,1), "d"))
         #print(path_length(new_graph.copy(), special.copy(), pos))
 
+
+if __name__ == "__main__":
+    main()
 
 # solution for 06.01:
 # solution for 06.02:
