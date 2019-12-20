@@ -1,4 +1,9 @@
 
+
+
+def add_p(p, p2):
+    return (p[0]+p2[0], p[1]+p2[1])
+
 def draw(f, symbols=None):
 
     if symbols == None:
