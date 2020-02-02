@@ -51,18 +51,43 @@ def puzzle_2(data):
     #command.append("NOT H T")
     #command.append("AND T J")
     #command.append("AND I J")
-    # x __#_#
-    #  abcdefghi
-    command.append("NOT B T")
-    command.append("NOT C J")
-    command.append("AND T J")
-    command.append("AND D J")
-    command.append("NOT E T")
-    command.append("AND T J")
-    command.append("AND F J")
+    ## x __#_#
+    ##  abcdefghi
+    #command.append("NOT B T")
+    #command.append("NOT C J")
+    #command.append("AND T J")
+    #command.append("AND D J")
+    #command.append("NOT E T")
+    #command.append("AND T J")
+    #command.append("AND F J")
+    ## x __#_#
+    ##  abcdefghi
+    #command.append("NOT B T")
+    #command.append("NOT C J")
+    #command.append("AND T J")
+    #command.append("AND D J")
+    #command.append("NOT E T")
+    #command.append("AND T J")
+    #command.append("AND F J")
     # x_
-    command.append("NOT A T")
-    command.append("OR T J")
+    #command.append("NOT A T")
+    #command.append("NOT B J")
+    #command.append("OR T J")
+
+    command.append("OR D T")
+    command.append("AND H T")
+
+    command.append("OR E J")
+    command.append("AND I J")
+
+    command.append("AND T J")
+
+
+
+
+
+
+    #command.append("OR T J")
 
 
     print(len(command))
