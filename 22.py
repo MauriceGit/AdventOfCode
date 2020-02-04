@@ -40,17 +40,11 @@ def main():
             elif line.startswith("deal with"):
                 commands.append((deal_incr_n, int(line.split(" ")[-1])))
 
-        cards = run(commands)
-
-        for i,c in enumerate(cards):
-            if c == 2019:
-                print(i)
-
-
+        print("Puzzle 1: {}".format(run(commands).index(2019)))
 
 
 if __name__ == "__main__":
     main()
 
-# solution for 22.01:
+# solution for 22.01: 2514
 # solution for 22.02:
