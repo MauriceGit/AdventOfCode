@@ -26,6 +26,17 @@ def run(commands, cards):
     return cards
 
 
+def run_for_0(commands, i):
+    for c in commands:
+        if c[0] == deal_new_stack:
+            i = (deck_size-1)-i
+        elif c[0] == cut_n:
+            i -= c[1]
+        elif c[0] == deal_incr_n:
+            i *= c[1]
+    return i
+
+
 def puzzle_2():
 
     #print([ ((i+2) *-4)%17 for i in range(17)])
@@ -68,27 +79,33 @@ def main():
 
                 index = (index*int(line.split(" ")[-1]))#%deck_size
 
-        #print((index)%deck_size)
 
-        #commands *= 4
 
         cards = list(range(deck_size))
         out = cards
+        out_i = 0
 
-        for i in range(2):
+        for i in range(10):
             out = run(commands, out)
+            out_i = run_for_0(commands, out_i)
+            print("       {}".format(out_i%deck_size))
+            print("{} - 0: {}".format(i, out.index(0)))
+            print("{} - 1: {}".format(i, out.index(1)))
+            print("  diff:    {}\n".format((out.index(1)-out.index(0))%deck_size))
 
 
+        #pow(311, 10, 10007)
+        #4166
 
-        for i in range (1, 10):
-            print("{} - {}: {}".format(i-1, i, (out.index(i)-out.index(i-1))%deck_size))
+        #for i in range (1, 10):
+        #    print("{} - {}: {}".format(i-1, i, (out.index(i)-out.index(i-1))%deck_size))
 
-        print("Puzzle 1: {}".format(out.index(0)))
-        print("Puzzle 1: {}".format(out.index(1)))
-        print("Puzzle 1: {}".format(out.index(3000)))
-        #print("Puzzle 1: {}".format(run(commands).index(2019)))
-
-        print("Puzzle 1: {}".format(out[6000]))
+        #print("Puzzle 1: {}".format(out.index(0)))
+        #print("Puzzle 1: {}".format(out.index(1)))
+        #print("Puzzle 1: {}".format(out.index(3000)))
+        ##print("Puzzle 1: {}".format(run(commands).index(2019)))
+        #
+        #print("Puzzle 1: {}".format(out[6000]))
 
 
         #puzzle_2()
