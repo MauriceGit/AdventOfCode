@@ -1,4 +1,6 @@
 from collections import defaultdict
+from sympy import mod_inverse
+
 
 deck_size = 10007
 #deck_size = 17
@@ -17,37 +19,77 @@ def deal_incr_n(cards, n):
     return l
 
 def run(commands, cards):
-
-
-
     for c in commands:
         cards = c[0](cards, c[1])
 
     return cards
 
 
-def run_for_0(commands, i):
+def egcd(a, b):
+    if a == 0:
+        return (b, 0, 1)
+    else:
+        g, y, x = egcd(b % a, a)
+        return (g, x - (b // a) * y, y)
+
+def modinv_(a, m):
+    g, x, y = egcd(a, m)
+    if g != 1:
+        raise Exception('modular inverse does not exist')
+    else:
+        return x % m
+
+modinv = lambda A, n,s=1,t=0,N=0: (n < 2 and t%N or modinv(n, A%n, t, s-A//n*t, N or n),-1)[n<1]
+
+def rev_new_stack(i, _, d):
+    return d-1-i
+
+def rev_cut(i, n, d):
+    # without the + stack_size ??
+    return (i+n+d)%d
+
+def rev_incr_n(i, n, d):
+    return modinv_(n, d) * i%d
+
+def f(commands, i, d):
     for c in commands:
-        if c[0] == deal_new_stack:
-            i = (deck_size-1)-i
-        elif c[0] == cut_n:
-            i -= c[1]
-        elif c[0] == deal_incr_n:
-            i *= c[1]
+        i = c[0](i, c[1], d)
     return i
 
 
-def puzzle_2():
+# f() reverses the chain of commands once for an index!
+# All operations are linear.
+# So there must be a polynom of the form: A*X+B = Y
+# We create two, like:
+# X = 2020, Y = f(2020)
+# and: A*Y+B = Z
+# After substracting them from each other, we get:
+#   A = (Y-Z)/(X-Y)
+#   B = Y-A*X
+# After we have A and B, reapply f a couple of times. Note, that:
+# f(f(f(x))) == A*(A*(A*X+B)+B)+B
+#            == A^3*X + A^2*B + A*B + B
+#            -> A^n*x + (A^n-1) / (A-1) * B
 
-    #print([ ((i+2) *-4)%17 for i in range(17)])
+def puzzle_2(commands):
+
+    print(f(commands, 2514, 10007))
 
 
-    l = [0]*deck_size
+    d = 119315717514047
+    x = 2020
+    y = f(commands, x, d)
+    z = f(commands, y, d)
+    a = (y-z) * modinv_(x-y+d, d) % d
+    b = (y-a*x) %d
+    n = 101741582076661
 
-    for i, v in enumerate(range(17)):
-        l[(((i-2) *4)+2)%17] = v
+    print(a,b)
 
-    print(l)
+    return (pow(a, n, d)*x + (pow(a, n, d)-1) * modinv_(a-1, d) * b) %d
+
+    # 61413248796526 too low
+
 
 
 
@@ -57,6 +99,7 @@ def main():
     with open("22.data", "r") as f:
 
         commands = []
+        commands_rev = []
 
         index = 2019
 
@@ -66,50 +109,20 @@ def main():
 
             if line.startswith("deal into"):
                 commands.append((deal_new_stack, 0))
-
-                index = ((deck_size-1)-index)#%deck_size
+                commands_rev.append((rev_new_stack, 0))
 
             elif line.startswith("cut"):
                 commands.append((cut_n, int(line.split(" ")[-1])))
-
-                index = (index-int(line.split(" ")[-1]))#%deck_size
+                commands_rev.append((rev_cut, int(line.split(" ")[-1])))
 
             elif line.startswith("deal with"):
                 commands.append((deal_incr_n, int(line.split(" ")[-1])))
+                commands_rev.append((rev_incr_n, int(line.split(" ")[-1])))
+        commands_rev = reversed(commands_rev)
 
-                index = (index*int(line.split(" ")[-1]))#%deck_size
+        print(run(commands, list(range(deck_size))).index(2019))
 
-
-
-        cards = list(range(deck_size))
-        out = cards
-        out_i = 0
-
-        for i in range(10):
-            out = run(commands, out)
-            out_i = run_for_0(commands, out_i)
-            print("       {}".format(out_i%deck_size))
-            print("{} - 0: {}".format(i, out.index(0)))
-            print("{} - 1: {}".format(i, out.index(1)))
-            print("  diff:    {}\n".format((out.index(1)-out.index(0))%deck_size))
-
-
-        #pow(311, 10, 10007)
-        #4166
-
-        #for i in range (1, 10):
-        #    print("{} - {}: {}".format(i-1, i, (out.index(i)-out.index(i-1))%deck_size))
-
-        #print("Puzzle 1: {}".format(out.index(0)))
-        #print("Puzzle 1: {}".format(out.index(1)))
-        #print("Puzzle 1: {}".format(out.index(3000)))
-        ##print("Puzzle 1: {}".format(run(commands).index(2019)))
-        #
-        #print("Puzzle 1: {}".format(out[6000]))
-
-
-        #puzzle_2()
-
+        print(puzzle_2(commands_rev))
 
 if __name__ == "__main__":
     main()
