@@ -83,6 +83,7 @@ def puzzle_2(commands):
     x = 2020
     y = f(commands, x, d)
     z = f(commands, y, d)
+    # Use modinv instead of '/' in space mod D!
     a = (y-z) * modinv(x-y+d, d) % d
     b = (y-a*x) %d
     n = 101741582076661
