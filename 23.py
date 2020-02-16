@@ -1,8 +1,10 @@
 from intcode import IntCode
 from threading import Thread
 from queue import Queue
+from collections import defaultdict
 
-def run_intcode(data, id, other_input_queues, stop_queue):
+
+def run_intcode(data, id, other_input_queues, stop_queue, nat_queue):
 
     m = IntCode(data)
     in_queue = other_input_queues[id]
@@ -23,18 +25,53 @@ def run_intcode(data, id, other_input_queues, stop_queue):
         if len(out) > 0:
             for oi in range(len(out)//3):
                 if out[oi*3] == 255:
-                    print("Puzzle 1: {}".format(out[oi*3+2]))
-                    # Stop all other machines as well
-                    stop_queue.put("STOP")
-                    return
 
-                # directly feeds the correct input queue with data!
-                other_input_queues[out[oi*3]].put((out[oi*3+1], out[oi*3+2]))
+                    ####################################################
+                    # Uncomment this for puzzle 1 solution!
+                    ####################################################
+                    #print("Puzzle 1: {}".format(out[oi*3+2]))
+                    ## Stop all other machines as well
+                    #stop_queue.put("STOP")
+                    #return
+                    nat_queue.put((out[oi*3+1], out[oi*3+2]))
+                else:
+                    # directly feeds the correct input queue with data!
+                    other_input_queues[out[oi*3]].put((out[oi*3+1], out[oi*3+2]))
+
+def run_nat(input_queues, stop_queue, nat_queue):
+
+    last_pair = ()
+    d = defaultdict(bool)
+
+    while True:
+
+        while not nat_queue.empty():
+            last_pair = nat_queue.get()
+
+        all_empty = True
+        for q in input_queues:
+            all_empty = all_empty and input_queues[q].empty()
+
+        if all_empty and last_pair != ():
+
+            print(last_pair)
+            # already sent before!
+            if d[last_pair]:
+                print("Puzzle 2: {}".format(last_pair[1]))
+                #stop_queue.put("STOP")
+                #return
+
+            d[last_pair] = True
+
+            input_queues[0].put(last_pair)
+            last_pair = ()
 
 
-
-
-
+# NOT 17262
+# 16153 too high
+# 16138 too low
+# 16145 ?
+# 16147 ?
 
 def main():
 
@@ -43,16 +80,24 @@ def main():
     machines = []
     machine_cnt = 50
 
-    in_queues = [Queue(maxsize=0) for i in range(machine_cnt)]
+    in_queues = defaultdict(list)
     stop_queue = Queue(maxsize=0)
 
     for i in range(machine_cnt):
-        machines.append(Thread(target=run_intcode, args=(data, i, in_queues, stop_queue)))
+        in_queues[i] = Queue(maxsize=0)
+    nat_queue = Queue(maxsize=0)
 
+    for i in range(machine_cnt):
+        machines.append(Thread(target=run_intcode, args=(data, i, in_queues, stop_queue, nat_queue)))
+
+    nat_t = Thread(target=run_nat, args=(in_queues, stop_queue, nat_queue))
+
+    nat_t.start()
     for m in machines:
         m.start()
     for m in machines:
         m.join()
+    nat_t.join()
 
 
 
