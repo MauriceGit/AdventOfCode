@@ -1,16 +1,16 @@
 from collections import defaultdict
 
+# print bits filled up to 25 chars with 0s
 def p(i, end="\n"):
     print("{0:b}".format(i).zfill(25), end=end)
 
+# pretty print the bitmap, just like on the website :)
 def pp(i):
     for j,c in enumerate(reversed("{0:b}".format(i).zfill(25))):
         if j > 0 and j%5 == 0:
             print("")
         print("#" if c == "1" else ".", end="")
     print("")
-
-
 
 
 # returns just one bit, if it should stay alive and 0 otherwise
@@ -80,7 +80,7 @@ def infested_puzzle_2(_, x, y, s, level, i_dict):
     else:
         right = (i_out & (1<<13)) if x == 4 else (i & (1<<(s+1)))
 
-    return sum(map(lambda x: bin(x).count("1"), [up, down, left, right]))
+    return sum(map(lambda x: bin(x)[2:].count("1"), [up, down, left, right]))
 
 
 def one_epoche(i, infested, level=0, i_dict=None, exclude_center=False):
@@ -103,14 +103,13 @@ def run_puzzle_1(i):
         if i in s:
             return i
         s.add(i)
-    return None
 
 def run_puzzle_2(i):
 
     d = defaultdict(int)
     d[0] = i
 
-    for _ in range(10):
+    for _ in range(200):
         new_d = defaultdict(int)
 
         max_level = 0
@@ -123,19 +122,12 @@ def run_puzzle_2(i):
             min_level = min(level, min_level)
 
         # Every iteration, we can potentially go one level higher/deeper.
-        new_d[max_level+1] = one_epoche(d[level], infested_puzzle_2, max_level+1, d, True)
-        new_d[min_level-1] = one_epoche(d[level], infested_puzzle_2, min_level-1, d, True)
+        new_d[max_level+1] = one_epoche(d[max_level+1], infested_puzzle_2, max_level+1, d, True)
+        new_d[min_level-1] = one_epoche(d[min_level-1], infested_puzzle_2, min_level-1, d, True)
 
-        d = new_d.copy()
-
-    for k,v in sorted(d.items(), key=lambda x: x[0]):
-        if v == 0:
-            continue
-        print(f"{k}:")
-        pp(v)
+        d = new_d
 
     return sum([bin(v).count("1") for _,v in d.items()])
-
 
 
 def main():
@@ -147,7 +139,7 @@ def main():
             for v in line:
                 s = ("1" if v == "#" else "0") + s
 
-        #print("Puzzle 1: {}".format(run_puzzle_1(int(s, 2))))
+        print("Puzzle 1: {}".format(run_puzzle_1(int(s, 2))))
         print("Puzzle 2: {}".format(run_puzzle_2(int(s, 2))))
 
 
@@ -155,4 +147,4 @@ if __name__ == "__main__":
     main()
 
 # solution for 24.01: 18407158
-# solution for 24.02:
+# solution for 24.02: 1998
