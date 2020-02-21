@@ -109,7 +109,8 @@ def run_puzzle_2(i):
 
     d = defaultdict(int)
     d[0] = i
-    for _ in range(1):
+
+    for _ in range(10):
         new_d = defaultdict(int)
 
         max_level = 0
@@ -117,13 +118,13 @@ def run_puzzle_2(i):
 
         # recalculate all maps.
         for level in d.copy():
-            new_d[level] = one_epoche(_, infested_puzzle_2, level, d, True)
+            new_d[level] = one_epoche(d[level], infested_puzzle_2, level, d, True)
             max_level = max(level, max_level)
             min_level = min(level, min_level)
 
         # Every iteration, we can potentially go one level higher/deeper.
-        new_d[max_level+1] = one_epoche(_, infested_puzzle_2, max_level+1, d, True)
-        new_d[min_level-1] = one_epoche(_, infested_puzzle_2, min_level-1, d, True)
+        new_d[max_level+1] = one_epoche(d[level], infested_puzzle_2, max_level+1, d, True)
+        new_d[min_level-1] = one_epoche(d[level], infested_puzzle_2, min_level-1, d, True)
 
         d = new_d.copy()
 
@@ -146,7 +147,7 @@ def main():
             for v in line:
                 s = ("1" if v == "#" else "0") + s
 
-        print("Puzzle 1: {}".format(run_puzzle_1(int(s, 2))))
+        #print("Puzzle 1: {}".format(run_puzzle_1(int(s, 2))))
         print("Puzzle 2: {}".format(run_puzzle_2(int(s, 2))))
 
 
