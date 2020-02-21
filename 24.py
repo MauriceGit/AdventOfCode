@@ -3,6 +3,14 @@ from collections import defaultdict
 def p(i, end="\n"):
     print("{0:b}".format(i).zfill(25), end=end)
 
+def pp(i):
+    for j,c in enumerate(reversed("{0:b}".format(i).zfill(25))):
+        if j > 0 and j%5 == 0:
+            print("")
+        print("#" if c == "1" else ".", end="")
+    print("")
+
+
 
 
 # returns just one bit, if it should stay alive and 0 otherwise
@@ -101,7 +109,7 @@ def run_puzzle_2(i):
 
     d = defaultdict(int)
     d[0] = i
-    for _ in range(10):
+    for _ in range(1):
         new_d = defaultdict(int)
 
         max_level = 0
@@ -118,7 +126,12 @@ def run_puzzle_2(i):
         new_d[min_level-1] = one_epoche(_, infested_puzzle_2, min_level-1, d, True)
 
         d = new_d.copy()
-    p(d[-5])
+
+    for k,v in sorted(d.items(), key=lambda x: x[0]):
+        if v == 0:
+            continue
+        print(f"{k}:")
+        pp(v)
 
     return sum([bin(v).count("1") for _,v in d.items()])
 
@@ -134,7 +147,7 @@ def main():
                 s = ("1" if v == "#" else "0") + s
 
         print("Puzzle 1: {}".format(run_puzzle_1(int(s, 2))))
-        #print("Puzzle 2: {}".format(run_puzzle_2(int(s, 2))))
+        print("Puzzle 2: {}".format(run_puzzle_2(int(s, 2))))
 
 
 if __name__ == "__main__":
