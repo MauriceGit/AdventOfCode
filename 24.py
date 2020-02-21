@@ -39,10 +39,10 @@ def infested_puzzle_1(i, x, y, s, *_):
 def get_row(first_row):
     return 31 if first_row else 32505856
 
-# returns set bits for a whole row (5 values). first/last row!
-# 17318416 == 1000010000100001000010000, 1082401 == 0000100001000010000100001
+# returns set bits for a whole col (5 values). first/last col!
+# 1082401 == 0000100001000010000100001, 17318416 == 1000010000100001000010000
 def get_col(first_col):
-    return 17318416 if first_col else 1082401
+    return 1082401 if first_col else 17318416
 
 # i_dict is a dictionary: "level -> i" used to query different levels
 # we ignore the i parameter, as we can read it from the dict ourselves (for consistency).
@@ -109,7 +109,7 @@ def run_puzzle_2(i):
 
         # recalculate all maps.
         for level in d.copy():
-            new_d[level] = one_epoche(_, infested_puzzle_2, level, d.copy(), True)
+            new_d[level] = one_epoche(_, infested_puzzle_2, level, d, True)
             max_level = max(level, max_level)
             min_level = min(level, min_level)
 
@@ -118,7 +118,9 @@ def run_puzzle_2(i):
         new_d[min_level-1] = one_epoche(_, infested_puzzle_2, min_level-1, d, True)
 
         d = new_d.copy()
-    p(d[0])
+    p(d[-5])
+
+    return sum([bin(v).count("1") for _,v in d.items()])
 
 
 
@@ -132,7 +134,7 @@ def main():
                 s = ("1" if v == "#" else "0") + s
 
         print("Puzzle 1: {}".format(run_puzzle_1(int(s, 2))))
-        print("Puzzle 1: {}".format(run_puzzle_2(int(s, 2))))
+        #print("Puzzle 2: {}".format(run_puzzle_2(int(s, 2))))
 
 
 if __name__ == "__main__":
