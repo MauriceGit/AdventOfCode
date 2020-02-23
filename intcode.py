@@ -94,6 +94,9 @@ class IntCode:
         self.outputs = []
         return out
 
+    def get_outputs_str(self):
+        return "".join(map(chr, self.get_outputs()))
+
     def get_all_outputs(self):
         return self.all_outputs
 
