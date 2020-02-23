@@ -28,11 +28,11 @@ def p(machine, color="", s=""):
 
 
     if color == "red":
-        color = "\33[31m"
+        color = "\33[93m"
     elif color == "green":
         color = "\33[32m"
     elif color == "yellow":
-        color = "\033[93m"
+        color = "\033[96m"
 
     if s == "":
         s = machine.get_outputs_str()
