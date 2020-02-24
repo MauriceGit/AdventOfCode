@@ -55,6 +55,7 @@ def get_info(s, info_type):
     match = list(map(lambda x: x[2:], match))
     return match
 
+
 def bfs(machine, path):
 
     found_checkpoint = False
@@ -91,6 +92,7 @@ def run_bfs(data):
 
     paths = Queue(maxsize=0)
     visited = set()
+    checkpoint = []
 
     machine = IntCode(data)
     room, new_paths, _ = bfs(machine, [])
@@ -109,11 +111,24 @@ def run_bfs(data):
             visited.add(room)
 
             if found_checkpoint:
+                checkpoint = path
                 print("Found checkpoint!")
 
-
-    print(visited) # 21!
+    print(visited)
     command(machine, "inv")
+    p(machine)
+
+    #checkpoint += ["north"]
+
+    command(machine, "drop mug")
+    command(machine, "drop monolith")
+    command(machine, "drop bowl of rice")
+    command(machine, "drop weather machine")
+
+    print(checkpoint)
+    for path in checkpoint:
+        command(machine, path)
+    #s = machine.get_outputs_str()
     p(machine)
 
 
