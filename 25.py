@@ -2,7 +2,7 @@ from intcode import IntCode
 import os
 from utility import draw
 from collections import defaultdict, Counter
-
+from queue import Queue
 import re
 
 DOORS = "Doors here lead:"
@@ -19,8 +19,9 @@ def inverse(c):
     return {"south": "north", "north": "south", "west": "east", "east": "west"}[c]
 
 # prints the input to the machine in green and bold
-def command(machine, s):
-    print("{}{}--> {}{}".format("\033[1m", "\033[92m", s, "\033[0m"))
+def command(machine, s, verbose=False):
+    if verbose:
+        print("{}{}--> {}{}".format("\033[1m", "\033[92m", s, "\033[0m"))
     machine.set_inputs(list(map(ord, s)) + [ord("\n")])
 
 # prints the output of the machine in yellow
@@ -39,6 +40,12 @@ def p(machine, color="", s=""):
     print("{}{}{}".format(color, s, "\033[0m"))
 
 
+def get_room(s):
+    match = re.search(r"^== .* ==$", s, re.MULTILINE)
+    if match == None:
+        return ""
+    return match.group(0)[3:-3]
+
 def get_info(s, info_type):
     match = re.search(r"^"+info_type+r"\n(^-.*$\n)*\n", s, re.MULTILINE)
     if match == None:
@@ -48,53 +55,66 @@ def get_info(s, info_type):
     match = list(map(lambda x: x[2:], match))
     return match
 
-def run(machine, grid, pos, door="", going_back=False):
+def bfs(machine, path):
 
-    if door != "":
-        command(machine, door)
-
-
-
-    new_pos = pos
-    if door != "":
-        new_pos = add(pos, direction(door))
-    if new_pos in grid:
-        # go back!
-        command(machine, inverse(door))
-        # ignore the current location stuff.
-        machine.get_outputs_str()
-        return
-
-
-
+    found_checkpoint = False
     s = machine.get_outputs_str()
+    for p in path:
+        command(machine, p)
+        s = machine.get_outputs_str()
+        if "ejected back to the checkpoint" in s:
+            path = path[:-1]
+            found_checkpoint = True
+            break
 
-    if "ejected back to the checkpoint" in s:
-        p(machine, "red", s)
-        # ejected back, no manual command!
-        return
+    room, doors = get_room(s), get_info(s, DOORS)
 
-    grid[new_pos] = True
+    # Right now, we need to handle checkpoints separately so we don't try to run into them all the time...
+    if found_checkpoint:
+        doors = []
 
-    if not going_back:
-        p(machine, "yellow", s)
-    doors = get_info(s, DOORS)
+
     items = get_info(s, ITEMS)
-
-    # Take stuff.
     for i in items:
-        if i in ("infinite loop", "photons", "escape pod", "molten lava"):
+        if i in ("infinite loop", "photons", "escape pod", "molten lava", "giant electromagnet"):
             continue
         command(machine, "take " + i)
 
-    for d in doors:
-        run(machine, grid, new_pos, d)
+    for p in reversed(path):
+        command(machine, inverse(p))
+        s = machine.get_outputs_str()
+        #print(s)
 
-    if door != "":
-        run(machine, grid, pos, inverse(door), going_back=True)
+    return room, doors, found_checkpoint
+
+def run_bfs(data):
+
+    paths = Queue(maxsize=0)
+    visited = set()
+
+    machine = IntCode(data)
+    room, new_paths, _ = bfs(machine, [])
+    visited.add(room)
+
+    for np in new_paths:
+        paths.put([np])
+
+    while not paths.empty():
+        path = paths.get()
+
+        room, new_paths, found_checkpoint = bfs(machine, path)
+        if room not in visited:
+            for np in new_paths:
+                paths.put(path + [np])
+            visited.add(room)
+
+            if found_checkpoint:
+                print("Found checkpoint!")
 
 
-
+    print(visited) # 21!
+    command(machine, "inv")
+    p(machine)
 
 
 
@@ -104,12 +124,10 @@ if __name__ == "__main__":
 
     machine = IntCode(data)
 
-    os.system('clear')
-    os.system('clear')
+    #os.system('clear')
+    #os.system('clear')
 
-    grid = dict()
-
-    run(machine, grid, (0,0))
+    run_bfs(data)
 
 # solution for 25.01:
 # solution for 25.02:

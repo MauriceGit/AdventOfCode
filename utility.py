@@ -4,7 +4,7 @@
 def add_p(p, p2):
     return (p[0]+p2[0], p[1]+p2[1])
 
-def draw(f, symbols=None):
+def draw(f, symbols=None, print_directly=False):
 
     if symbols == None:
         symbols = {-1: "█", 0: "█", 1: " ", 2: "0", 3: "#", 4: "X"}
@@ -24,7 +24,10 @@ def draw(f, symbols=None):
                 c = f[p]
 
             if c not in symbols:
-                symbols[c] = "?"
+                if print_directly:
+                    symbols[c] = c
+                else:
+                    symbols[c] = "?"
 
             print(symbols[c], end="")
 
