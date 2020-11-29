@@ -114,7 +114,7 @@ def open_data(filename, no_filter=False):
     with open(filename, "r") as f:
         if no_filter:
             return f.read().splitlines()
-        return list(lambda x: not x.startswith("//") and not x.strip() == "", f.read().splitlines())
+        return list(filter(lambda x: not x.startswith("//") and not x.strip() == "", f.read().splitlines()))
 
 
 # Can draw a 2D-map of coordinates -> something in dictionary form.
