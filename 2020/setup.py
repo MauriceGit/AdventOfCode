@@ -15,7 +15,7 @@ def setup_data(day):
     if os.path.isfile(data_file):
         return f"Data for day {day} already downloaded"
 
-    r = requests.get(f"https://adventofcode.com/2019/day/{int(day)}/input", cookies=cookies)
+    r = requests.get(f"https://adventofcode.com/2020/day/{int(day)}/input", cookies=cookies)
 
     with open(data_file, "w") as f:
         f.write(r.text)
