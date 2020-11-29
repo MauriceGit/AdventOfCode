@@ -1,3 +1,2 @@
-## Complete implementation of AdventOfCode 2019
+## AOC 2020 -- Will be updated ...
 
-![Overview](aoc_19.png)
