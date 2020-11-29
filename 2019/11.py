@@ -1,6 +1,6 @@
 from intcode import IntCode
 from collections import defaultdict
-from operator import itemgetter
+from utility import draw
 
 def rotate(d, left):
     return (-d[1], d[0]) if left else (d[1], -d[0])
@@ -37,13 +37,7 @@ if __name__ == "__main__":
     max_y = max(painted_color.keys(), key=lambda x: x[1])[1]
 
     # Output for puzzle 2:
-    for i in range(min_x, max_x+1):
-        for j in range(min_y, max_y+1):
-            if (i,j) in painted_color:
-                print(" " if painted_color[(i,j)] == 0 else "█", end='')
-            else:
-                print(" ", end='')
-        print("")
+    draw(painted_color, {-1: " ", 0: " ", 1: "█"}, flip=True)
 
 # solution for 11.01: 1863
 # solution for 11.02: BLULZJLZ
