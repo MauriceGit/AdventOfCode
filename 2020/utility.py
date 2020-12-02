@@ -107,6 +107,21 @@ def cmp(x1, x2):
 def lcm(a,b):
     return (a*b)//gcd(a,b)
 
+def lmap(f, *iterables):
+    return list(map(f, *iterables))
+
+def ints(s):
+    if type(s) == str:
+        return lmap(int, re.findall(r"-?\d+", s))
+    if type(s) == list:
+        return lmap(int, s)
+
+def floats(s):
+    if type(s) == str:
+        return lmap(float, re.findall(r"-?\d+(?:\.\d+)?", s))
+    if type(s) == list:
+        return lmap(float, s)
+
 ############################### IO
 
 # Return .data file split up for each line
