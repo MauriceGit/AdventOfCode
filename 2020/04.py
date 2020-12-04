@@ -11,26 +11,26 @@ def is_valid(s):
         for k in ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"]:
             v = s[k]
 
-            if k == "byr" and (int(v) < 1920 or int(v) > 2002):
+            if k == "byr" and not (1920 <= int(v) <= 2002):
                 return True, False
-            if k == "iyr" and (int(v) < 2010 or int(v) > 2020):
+            if k == "iyr" and not (2010 <= int(v) <= 2020):
                 return True, False
-            if k == "eyr" and (int(v) < 2020 or int(v) > 2030):
+            if k == "eyr" and not (2020 <= int(v) <= 2030):
                 return True, False
-            if k == "hgt":
-                if v[-2:] not in ["in", "cm"]:
-                    return True, False
-                v2 = int(v[:-2])
-                if v[-2:] == "cm" and (v2 < 150 or v2 > 193):
-                    return True, False
-                elif v[-2:] == "in" and (v2 < 59 or v2 > 76):
-                    return True, False
 
-            if k == "hcl" and (v[0] != "#" or not re.match(r"(\d|[a-f]){6}", v[1:])):
+            if k == "hgt":
+                m = re.match(r"(\d+)(cm|in)", v)
+                if not m:
+                    return True, False
+                if m.group(2) == "cm" and not (150 <= int(m.group(1)) <= 193):
+                    return True, False
+                if m.group(2) == "in" and not (59 <= int(m.group(1)) <= 76):
+                    return True, False
+            if k == "hcl" and not re.match(r"(#(\d|[a-f]){6})$", v):
                 return True, False
             if k == "ecl" and v not in ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"]:
                 return True, False
-            if k == "pid" and not re.match(r"\d{9}", v):
+            if k == "pid" and not re.match(r"\d{9}$", v):
                 return True, False
 
     except:
@@ -41,30 +41,26 @@ def is_valid(s):
 def main():
 
     lines = open_data("04.data", no_filter=True)
+    # So we don't miss the last passport without an empty line after
     lines.append("")
 
     valid = (0,0)
-
     passport = dict()
     for i, l in enumerate(lines):
-
         if l == "":
             valid = add(valid, is_valid(passport))
             passport = dict()
             continue
 
-
         for l2 in l.split(" "):
             key, value = l2.split(":")
             passport[key] = value
 
-
-    print(valid)
-
+    print(*valid)
 
 
 if __name__ == "__main__":
     main()
 
-# solution for 04.01: ?
-# solution for 04.02: ?
+# solution for 04.01: 254
+# solution for 04.02: 184
