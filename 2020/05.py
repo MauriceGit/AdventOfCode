@@ -8,10 +8,8 @@ def main():
     ids = set()
 
     for l in lines:
-        row = int(l[:7].replace("B", "1").replace("F", "0"), 2)
-        col = int(l[7:].replace("R", "1").replace("L", "0"), 2)
-
-        ids.add(row*8+col)
+        id_ = l.replace("B", "1").replace("F", "0").replace("R", "1").replace("L", "0")
+        ids.add(int(id_[:7], 2)*8 + int(id_[7:], 2))
 
     print(max(ids))
     print(*{x for x in range(128*8) if {x-1, x, x+1} & ids == {x-1, x+1}})
