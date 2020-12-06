@@ -2,18 +2,18 @@
 
 from utility import *
 from functools import reduce
+from operator import iconcat
 
 def main():
 
-    groups = open("06.data", "r").read().split("\n\n")
+    groups = open_data_groups("06.data")
 
     # Puzzle 1
-    print(sum(map(len, map(set, map(lambda x: x.replace("\n", ""), groups)))))
+    print(sum(map(len, map(set, [reduce(iconcat, g) for g in groups]))))
 
     # Puzzle 2
-    groups = map(lambda x: map(set, x.splitlines()), groups)
-    print(sum([len(reduce(set.intersection, g)) for g in groups]))
-
+    # sum over the generator object created by the ... for g in groups.
+    print(sum(len(reduce(set.intersection, map(set, g))) for g in groups))
 
 if __name__ == "__main__":
     main()

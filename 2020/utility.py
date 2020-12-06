@@ -131,6 +131,19 @@ def open_data(filename, no_filter=False):
             return f.read().splitlines()
         return list(filter(lambda x: not x.startswith("//") and not x.strip() == "", f.read().splitlines()))
 
+# Returns groups of lines divided by an empty line
+def open_data_groups(filename, no_filter=False):
+
+    groups = open("06.data", "r").read().split("\n\n")
+    groups = lmap(lambda x: x.splitlines(), groups)
+
+    if no_filter:
+        return groups
+
+    def filter_(g):
+        return list(filter(lambda x: not x.startswith("//") and not x.strip() == "", g))
+
+    return lmap(filter_, groups)
 
 # Can draw a 2D-map of coordinates -> something in dictionary form.
 # Requires a dict of: (int, int): char
