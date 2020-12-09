@@ -3,9 +3,7 @@
 from utility import *
 
 def is_sum(n, buf):
-    c = list(combinations(buf, 2))
-    l = lmap(sum, c)
-    return n in l
+    return n in map(sum, combinations(buf, 2))
 
 
 def main():
@@ -15,11 +13,8 @@ def main():
 
     preamble = 25
 
-    buf = []
+    buf = lines[:preamble]
     index = preamble
-    for i in range(preamble):
-        buf.append(lines[i])
-
     puzzle_1 = 0
 
     for i in range(preamble, len(lines)):
