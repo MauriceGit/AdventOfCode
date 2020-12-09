@@ -8,8 +8,7 @@ def is_sum(n, buf):
 
 def main():
 
-    lines = open_data("09.data")
-    lines = ints(lines)
+    lines = ints(open_data("09.data"))
 
     preamble = 25
 
