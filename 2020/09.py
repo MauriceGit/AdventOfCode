@@ -44,5 +44,5 @@ def main():
 if __name__ == "__main__":
     main()
 
-# solution for 09.01: ?
-# solution for 09.02: ?
+# solution for 09.01: 138879426
+# solution for 09.02: 23761694
