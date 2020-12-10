@@ -5,20 +5,16 @@ from functools import lru_cache
 
 @lru_cache
 def test(l, prev):
-
     if len(l) <= 1:
         return 1
 
-    if l[0]-prev > 3:
-        return test(l[1:], l[0])
-
     count = 0
     if l[1]-prev <= 3:
-        count += test(l[1:], prev)
+        # Recursive call with element removed from list
+        count = test(l[1:], prev)
 
-    count += test(l[1:], l[0])
-
-    return count
+    # Recursive call with the element kept in the list!
+    return count + test(l[1:], l[0])
 
 
 def main():
