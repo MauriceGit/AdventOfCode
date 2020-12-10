@@ -4,9 +4,15 @@ from utility import *
 
 def get_removeable(lines):
     removeable = defaultdict(int)
-    for i in reversed(range(2, len(lines))):
-        if lines[i]-lines[i-1] < 3 and lines[i-1]-lines[i-2] < 3:
-            removeable[lines[i-1]] = 1
+    for i in reversed(range(len(lines))):
+
+        if i == len(lines)-1:
+            continue
+        if i == 0:
+            continue
+
+        if lines[i+1]-lines[i] < 3 and lines[i]-lines[i-1] < 3:
+            removeable[lines[i]] = 1
     return list(removeable.keys())
 
 def main():
@@ -32,7 +38,7 @@ def main():
 
 
 
-    l1 = get_removeable([0]+lines)
+    l1 = get_removeable(lines)
 
     print(get_removeable(lines))
 
