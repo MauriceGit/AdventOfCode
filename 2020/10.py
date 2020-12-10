@@ -1,19 +1,25 @@
 #!/usr/bin/env python3.7
 
 from utility import *
+from functools import lru_cache
 
-def get_removeable(lines):
-    removeable = defaultdict(int)
-    for i in reversed(range(len(lines))):
+@lru_cache
+def test(l, prev):
 
-        if i == len(lines)-1:
-            continue
-        if i == 0:
-            continue
+    if len(l) <= 1:
+        return 1
 
-        if lines[i+1]-lines[i] < 3 and lines[i]-lines[i-1] < 3:
-            removeable[lines[i]] = 1
-    return list(removeable.keys())
+    if l[0]-prev > 3:
+        return test(l[1:], l[0])
+
+    count = 0
+    if l[1]-prev <= 3:
+        count += test(l[1:], prev)
+
+    count += test(l[1:], l[0])
+
+    return count
+
 
 def main():
 
@@ -26,30 +32,12 @@ def main():
     for i in range(1, len(lines)):
         diff[lines[i] - lines[i-1]] += 1
 
-
     print(diff[1]*diff[3])
 
-
-    #removeable = defaultdict(int)
-    #
-    #for i in reversed(range(2, len(lines))):
-    #    if lines[i]-lines[i-1] < 3 and lines[i-1]-lines[i-2] < 3:
-    #        removeable[lines[i-1]] = 1
-
-
-
-    l1 = get_removeable(lines)
-
-    print(get_removeable(lines))
-
-    #l2 = get_removeable(sorted(l1))
-    #print(get_removeable(sorted(l1)))
-
-    print(2**len(l1))
-
+    print(test(tuple(lines), 0))
 
 if __name__ == "__main__":
     main()
 
-# solution for 10.01: ?
-# solution for 10.02: ?
+# solution for 10.01: 2100
+# solution for 10.02: 16198260678656
