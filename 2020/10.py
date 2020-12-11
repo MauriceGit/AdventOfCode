@@ -3,7 +3,7 @@
 from utility import *
 from functools import lru_cache
 
-@lru_cache(maxsize=0)
+@lru_cache(maxsize=None)
 def test(l, prev):
     if len(l) <= 1:
         return 1

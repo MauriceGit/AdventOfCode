@@ -76,6 +76,12 @@ def direction_map(direction=None):
         return dict(zip("RLUD", [(1,0), (-1,0), (0,1), (0,-1)]))
     return dict(zip(direction, [(1,0), (-1,0), (0,1), (0,-1)]))
 
+def dir_list_4():
+    return [(1,0), (-1,0), (0,1), (0,-1)]
+
+def dir_list_8():
+    return dir_list_4() + [(1,1), (-1,-1), (-1,1), (1,-1)]
+
 # Takes a direction tuple and rotates it in 2D in the given direction
 def rotate(d, left):
     return (-d[1], d[0]) if left else (d[1], -d[0])
