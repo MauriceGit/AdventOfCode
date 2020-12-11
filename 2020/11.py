@@ -21,8 +21,7 @@ def epoche(seats, puzzle_2):
     get_seat_f = get2 if puzzle_2 else get
 
     for s in seats:
-        values = lmap(lambda x: get_seat_f(seats, s, x), dir_list_8())
-        c = Counter(values)
+        c = Counter(map(lambda x: get_seat_f(seats, s, x), dir_list_8()))
 
         if seats[s] == "L" and c["#"] == 0:
             new_seats[s] = "#"
