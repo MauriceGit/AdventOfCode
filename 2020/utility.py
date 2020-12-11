@@ -179,3 +179,4 @@ def draw(f, symbols=None, print_directly=False, flip=False):
             print(symbols[c], end="")
 
         print("")
+    print("")
