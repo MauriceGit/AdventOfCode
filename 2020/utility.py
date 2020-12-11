@@ -1,6 +1,7 @@
 
 ############################### Useful imports
 
+from functools import lru_cache
 
 from collections import defaultdict, Counter
 # Counter() creates a dictionary with "elem: count" for each element in the list.
@@ -76,9 +77,11 @@ def direction_map(direction=None):
         return dict(zip("RLUD", [(1,0), (-1,0), (0,1), (0,-1)]))
     return dict(zip(direction, [(1,0), (-1,0), (0,1), (0,-1)]))
 
+@lru_cache(maxsize=10)
 def dir_list_4():
     return [(1,0), (-1,0), (0,1), (0,-1)]
 
+@lru_cache(maxsize=10)
 def dir_list_8():
     return dir_list_4() + [(1,1), (-1,-1), (-1,1), (1,-1)]
 
