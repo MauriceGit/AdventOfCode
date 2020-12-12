@@ -1,13 +1,12 @@
 #!/usr/bin/env python3.7
 
 from utility import *
-import re
 
 def puzzle(lines, puzzle_1):
     dirs = direction_map("EWNS")
 
     pos = (0,0)
-    faceing = (1,0) if puzzle_1 else (10,1)
+    facing = (1,0) if puzzle_1 else (10,1)
 
     for l in lines:
 
@@ -18,17 +17,13 @@ def puzzle(lines, puzzle_1):
             if puzzle_1:
                 pos = add(pos, mul(dirs[command], count))
             else:
-                faceing = add(faceing, mul(dirs[command], count))
+                facing = add(facing, mul(dirs[command], count))
 
         if command in "LR":
-            faceing = rotate(faceing, command == "L", count=count//90)
+            facing = rotate(facing, command == "L", count=count//90)
 
         if command == "F":
-            if puzzle_1:
-                pos = add(pos, mul(faceing, count))
-            else:
-                for i in range(count):
-                    pos = add(pos, faceing)
+            pos = add(pos, mul(facing, count))
 
     return abs(pos[0])+abs(pos[1])
 

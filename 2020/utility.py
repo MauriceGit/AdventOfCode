@@ -3,6 +3,8 @@
 
 from functools import lru_cache
 
+import re
+
 from collections import defaultdict, Counter
 # Counter() creates a dictionary with "elem: count" for each element in the list.
 
