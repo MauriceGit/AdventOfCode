@@ -65,6 +65,9 @@ def add3(a,b):
 def add(p, p2):
     return (p[0]+p2[0], p[1]+p2[1])
 
+def mul(p, s):
+    return (p[0]*s, p[1]*s)
+
 def sub(p, p2):
     return (p2[0]-p[0], p2[1]-p[1])
 
@@ -86,8 +89,12 @@ def dir_list_8():
     return dir_list_4() + [(1,1), (-1,-1), (-1,1), (1,-1)]
 
 # Takes a direction tuple and rotates it in 2D in the given direction
-def rotate(d, left):
-    return (-d[1], d[0]) if left else (d[1], -d[0])
+# ignores a count=0 and still rotates at least once!
+def rotate(d, left, count=1):
+    r = (-d[1], d[0]) if left else (d[1], -d[0])
+    if count > 1:
+        return rotate(r, left, count-1)
+    return r
 
 ############################### Graph things
 
