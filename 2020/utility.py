@@ -1,7 +1,7 @@
 
 ############################### Useful imports
 
-from functools import lru_cache
+from functools import lru_cache, reduce
 
 import re
 
