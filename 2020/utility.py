@@ -144,6 +144,11 @@ def floats(s):
     if type(s) == list:
         return lmap(float, s)
 
+# turns a list of tuples into lists with each element
+def unzip(l):
+    return lmap(list, zip(*l))
+
+
 ############################### IO
 
 # Return .data file split up for each line

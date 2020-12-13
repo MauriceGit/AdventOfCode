@@ -25,7 +25,7 @@ def main():
     busses = [(int(t), i) for i,t in enumerate(lines[1].split(",")) if t != "x"]
 
     # unzip list of tuples in to two lists with the elements
-    remainder, modulos = lmap(list, zip(*busses))
+    remainder, modulos = unzip(busses)
 
     # So I can search for it later: chinese remainder theorem, CRT, crt, Chinese Remainder Theorem.
     a, b = crt(remainder, modulos)
