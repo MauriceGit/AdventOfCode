@@ -58,6 +58,10 @@ from queue import Queue
 # q.empty(), q.get(), q.put(...)
 
 
+# CHINESE REMAINDER THEOREM. Make sure to substract the result[0] from result[1]:
+# result = result[1]-result[0]
+from sympy.ntheory.modular import crt
+
 ############################### Vector calculations
 
 # Adds, but with 3 coordinates
