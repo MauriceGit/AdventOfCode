@@ -8,11 +8,9 @@ def main_dict():
 
     pos = 0
     numbers = dict()
-    last_num = 0
 
     for i, n in enumerate(lines[:-1]):
         numbers[n] = pos
-        last_num = n
         pos = i+1
     last_num = lines[-1]
     pos = i+1
@@ -39,11 +37,9 @@ def main_list():
 
     pos = 0
     numbers = [-1]*30000000
-    last_num = 0
 
     for i, n in enumerate(lines[:-1]):
         numbers[n] = pos
-        last_num = n
         pos = i+1
     last_num = lines[-1]
     pos = i+1
