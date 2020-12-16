@@ -2,18 +2,15 @@
 
 from utility import *
 
-def valid(rules, ticket):
+def check(r, t, i):
+    return r[0][0] <= t[i] <= r[0][1] or r[1][0] <= t[i] <= r[1][1]
+
+def invalid_passes(rules, ticket):
+
     res = 0
-
-    for t in ticket:
-        ok = False
-        for r in rules.values():
-
-            if r[0][0] <= t <= r[0][1] or r[1][0] <= t <= r[1][1]:
-                ok = True
-                break
-        if not ok:
-            res += t
+    for i in range(len(ticket)):
+        if all([not check(r, ticket, i) for r in rules.values()]):
+            res += ticket[i]
 
     return res
 
@@ -21,17 +18,8 @@ def valid(rules, ticket):
 def try_index(rules, index, tickets):
 
     keys = set()
-
     for k in rules:
-        r = rules[k]
-
-        ok = True
-        for t in tickets:
-            #print(t[index])
-            if not (r[0][0] <= t[index] <= r[0][1] or r[1][0] <= t[index] <= r[1][1]):
-                ok = False
-                break
-        if ok:
+        if all([check(rules[k], t, index) for t in tickets]):
             keys.add(k)
 
     return keys
@@ -49,7 +37,7 @@ def main():
     good_tickets = []
     invalid_count = 0
     for l in lines[2][1:]:
-        invalid = valid(rules, ints(l))
+        invalid = invalid_passes(rules, ints(l))
         invalid_count += invalid
         if invalid == 0:
             good_tickets.append(ints(l))
@@ -57,20 +45,18 @@ def main():
     # Puzzle 1
     print(invalid_count)
 
-    valid_keys = []
-    for i in range(len(good_tickets[0])):
-        valid_keys.append(try_index(rules, i, good_tickets))
-
+    valid_keys = [try_index(rules, i, good_tickets) for i in range(len(good_tickets[0]))]
 
     key_index = [""] * len(valid_keys)
     while True:
         change = False
         for i, k in enumerate(valid_keys):
-            if len(valid_keys[i]) == 1:
+            if len(k) == 1:
 
+                # remove the found key from all other sets
                 for j in range(len(valid_keys)):
                     valid_keys[j] = valid_keys[j]-k
-
+                # save it in result list
                 key_index[i] = list(k)[0]
                 change = True
                 break
