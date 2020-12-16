@@ -161,7 +161,7 @@ def open_data(filename, no_filter=False):
 # Returns groups of lines divided by an empty line
 def open_data_groups(filename, no_filter=False):
 
-    groups = open("06.data", "r").read().split("\n\n")
+    groups = open(filename, "r").read().split("\n\n")
     groups = lmap(lambda x: x.splitlines(), groups)
 
     if no_filter:
