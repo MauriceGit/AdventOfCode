@@ -8,11 +8,13 @@ def check(r, t, i):
 def invalid_passes(rules, ticket):
 
     res = 0
+    valid = True
     for i in range(len(ticket)):
         if all([not check(r, ticket, i) for r in rules.values()]):
             res += ticket[i]
+            valid = False
 
-    return res
+    return valid, res
 
 
 def try_index(rules, index, tickets):
@@ -37,9 +39,9 @@ def main():
     good_tickets = []
     invalid_count = 0
     for l in lines[2][1:]:
-        invalid = invalid_passes(rules, ints(l))
-        invalid_count += invalid
-        if invalid == 0:
+        ok, count = invalid_passes(rules, ints(l))
+        invalid_count += count
+        if ok:
             good_tickets.append(ints(l))
 
     # Puzzle 1
@@ -48,8 +50,8 @@ def main():
     valid_keys = [try_index(rules, i, good_tickets) for i in range(len(good_tickets[0]))]
 
     key_index = [""] * len(valid_keys)
-    while True:
-        change = False
+
+    for _ in range(len(valid_keys)):
         for i, k in enumerate(valid_keys):
             if len(k) == 1:
 
@@ -58,10 +60,7 @@ def main():
                     valid_keys[j] = valid_keys[j]-k
                 # save it in result list
                 key_index[i] = list(k)[0]
-                change = True
                 break
-        if not change:
-            break
 
 
     my_passport = ints(lines[1][1])
