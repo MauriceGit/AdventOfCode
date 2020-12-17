@@ -1,6 +1,8 @@
 #!/usr/bin/env python3.7
 
 from utility import *
+from cachetools import cached
+from cachetools.keys import hashkey
 
 @lru_cache(maxsize=1)
 def dirs4():
@@ -12,12 +14,12 @@ def dirs3():
     r = list(range(-1, 2))
     return [(x,y,z) for x in r for y in r for z in r if (x,y,z) != (0,0,0)]
 
-
-def active_count(grid, p, fdirs, fadd):
+@cached(cache={}, key=lambda grid, p, fdirs, fadd, level: hashkey(p, fdirs, level))
+def active_count(grid, p, fdirs, fadd, level):
     return sum(grid[fadd(p, d)] for d in fdirs())
 
 
-def cycle(grid, fdirs, fadd, zero):
+def cycle(grid, fdirs, fadd, zero, level):
 
     dirs = fdirs() + [zero]
 
@@ -26,7 +28,7 @@ def cycle(grid, fdirs, fadd, zero):
         for offset in dirs:
             new_k = fadd(k, offset)
 
-            c = active_count(grid, new_k, fdirs, fadd)
+            c = active_count(grid, new_k, fdirs, fadd, level)
 
             if grid[new_k] and (2 <= c <= 3):
                 new_grid[new_k] = True
@@ -49,11 +51,11 @@ def main():
             grid4[(x, y, 0, 0)] = v == '#'
 
     for i in range(6):
-        grid3 = cycle(grid3, dirs3, add3, (0,0,0))
+        grid3 = cycle(grid3, dirs3, add3, (0,0,0), i)
     print(sum(grid3.values()))
 
     for i in range(6):
-        grid4 = cycle(grid4, dirs4, add4, (0,0,0,0))
+        grid4 = cycle(grid4, dirs4, add4, (0,0,0,0), i)
     print(sum(grid4.values()))
 
 
