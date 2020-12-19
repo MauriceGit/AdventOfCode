@@ -3,6 +3,8 @@
 
 from functools import lru_cache, reduce
 
+from operator import itemgetter
+
 import re
 
 from collections import defaultdict, Counter
