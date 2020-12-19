@@ -14,7 +14,7 @@ def combine_rules(rules, rule):
         return rule
 
     if "+" in rule:
-        return rule
+        return "(" + combine_rules(rules, rule[:-1]) + ")+"
 
     this_rule = rules[rule]
     tmp = this_rule.split(" | ")
