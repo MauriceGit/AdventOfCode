@@ -13,6 +13,9 @@ def combine_rules(rules, rule):
     if rule in "ab":
         return rule
 
+    if "+" in rule:
+        return rule
+
     this_rule = rules[rule]
     tmp = this_rule.split(" | ")
     if len(tmp) > 1:
@@ -52,7 +55,7 @@ def main():
     #rules["8"]  = "42 | 42 8"
     #rules["11"] = "42 31 | 42 11 31"
 
-    rules["8"] = ""
+    rules["8"] = "42+"
     rules["11"] = ""
 
     longest_line = max(lmap(len, data))
@@ -61,11 +64,6 @@ def main():
 
     # Just put all possibilities up to the longest_line into the rules.
     for i in range(1, longest_line):
-        rules["8_{}".format(i)] = " ".join(["42"] * i)
-
-        if rules["8"] != "":
-            rules["8"] += " | "
-        rules["8"] += "8_{}".format(i)
 
         tmp1 = " ".join(["42"] * i)
         tmp2 = " ".join(["31"] * i)
