@@ -6,7 +6,6 @@ from cachetools import cached, LRUCache
 from cachetools.keys import hashkey
 
 cache = LRUCache(maxsize=10000)
-
 @cached(cache, key=lambda rules, rule: hashkey(rule))
 def combine_rules(rules, rule):
 
@@ -15,6 +14,12 @@ def combine_rules(rules, rule):
 
     if "+" in rule:
         return "(" + combine_rules(rules, rule[:-1]) + ")+"
+
+    if "{" in rule:
+        reg = re.match(r"(\d+)\{(\d+)\}", rule)
+        if reg:
+            new_r = combine_rules(rules, reg.group(1))
+            return "({}{{{}}})".format(new_r, reg.group(2))
 
     this_rule = rules[rule]
     tmp = this_rule.split(" | ")
@@ -65,10 +70,7 @@ def main():
     # Just put all possibilities up to the longest_line into the rules.
     for i in range(1, longest_line):
 
-        tmp1 = " ".join(["42"] * i)
-        tmp2 = " ".join(["31"] * i)
-
-        rules["11_{}".format(i)] = tmp1 + " " + tmp2
+        rules["11_{}".format(i)] = "42{{{}}} 31{{{}}}".format(i, i)
 
         if rules["11"] != "":
             rules["11"] += " | "

@@ -64,6 +64,12 @@ from queue import Queue
 # result = result[1]-result[0]
 from sympy.ntheory.modular import crt
 
+from cachetools import cached, LRUCache
+from cachetools.keys import hashkey
+#
+# @cached(cache, key=lambda rules, rule: hashkey(rule))
+# def combine_rules(rules, rule): ...
+
 ############################### Vector calculations
 
 # Adds, but with 3 coordinates
