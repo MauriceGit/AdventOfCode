@@ -12,9 +12,11 @@ def combine_rules(rules, rule):
     if rule in "ab":
         return rule
 
+    # handles: 223+
     if "+" in rule:
         return "(" + combine_rules(rules, rule[:-1]) + ")+"
 
+    # handles: 223{3}
     if "{" in rule:
         reg = re.match(r"(\d+)\{(\d+)\}", rule)
         if reg:
