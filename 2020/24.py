@@ -66,8 +66,6 @@ def main():
     print(sum(somethingsomething_art_exhibit(tiles, 100).values()))
 
 
-
-
 if __name__ == "__main__":
     main()
 
