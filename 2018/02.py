@@ -1,5 +1,7 @@
 #!/usr/bin/env python3.7
 
+import sys
+sys.path.append('../General')
 from utility import *
 
 def diff(a, b):
@@ -30,5 +32,6 @@ def main():
 if __name__ == "__main__":
     main()
 
+# year 2018
 # solution for 02.01: 8398
 # solution for 02.02: hhvsdkatysmiqjxunezgwcdpr
