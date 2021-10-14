@@ -4,23 +4,34 @@ import sys
 sys.path.append('../General')
 from utility import *
 
-# returns tuple of metadata-count and length of sub-data
-def metadata_count(l):
-    sub_length = 2
-    res = 0
+# return: (data, children), current_index_in_list
+def build_tree(l, index):
+    root = [[], []]
+    end_index = index+2
 
-    for c in range(l[0]):
-        a, b = metadata_count(l[sub_length:])
-        res += a
-        sub_length += b
+    for i in range(l[index]):
+        c, end_index = build_tree(l, end_index)
+        root[1].append(c)
 
-    return res+sum(l[sub_length:sub_length+l[1]]), sub_length+l[1]
+    root[0].extend(l[end_index:end_index+l[index+1]])
+    end_index += l[index+1]
+
+    return root, end_index
+
+def part_1(t):
+    return sum(t[0]) + sum(part_1(c) for c in t[1])
+
+def part_2(t):
+    return sum(t[0]) if len(t[1]) == 0 else sum(part_2(t[1][i-1]) for i in t[0] if i-1 < len(t[1]))
+
 
 def main():
 
     line = ints(open_data("08.data")[0])
 
-    print(metadata_count(line)[0])
+    t, _ = build_tree(line, 0)
+    print(part_1(t))
+    print(part_2(t))
 
 
 if __name__ == "__main__":
@@ -28,4 +39,4 @@ if __name__ == "__main__":
 
 # year 2018
 # solution for 08.01: 40984
-# solution for 08.02: ?
+# solution for 08.02: 37067
