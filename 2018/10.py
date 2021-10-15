@@ -39,4 +39,4 @@ if __name__ == "__main__":
 
 # year 2018
 # solution for 10.01: KFLBHXGK
-# solution for 10.02: ?
+# solution for 10.02: 10659
