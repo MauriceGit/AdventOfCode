@@ -5,12 +5,11 @@ sys.path.append('../General')
 from utility import *
 
 
-
 def main():
 
     lines = open_data("10.data")
 
-    stars = lmap(lambda x: [[x[0],x[1]], [x[2],x[3]]],map(ints, lines))
+    stars = lmap(lambda x: [[x[0],x[1]], [x[2],x[3]]], map(ints, lines))
 
     l = [x[0][0] for x in stars]
     x_dist = max(l) - min(l)
@@ -33,14 +32,6 @@ def main():
             print(count-1)
             break
         x_dist = d
-
-
-
-
-
-
-
-
 
 
 if __name__ == "__main__":
