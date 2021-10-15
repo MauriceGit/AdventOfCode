@@ -26,7 +26,6 @@ def play(max_marble, player_count):
     return max(points)
 
 
-
 def main():
 
     p_count, max_marble = ints(open_data("09.data")[0])
