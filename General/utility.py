@@ -110,6 +110,8 @@ def dir_list_8():
 # Takes a direction tuple and rotates it in 2D in the given direction
 # ignores a count=0 and still rotates at least once!
 def rotate(d, left, count=1):
+    if count == 0:
+        return d
     r = (-d[1], d[0]) if left else (d[1], -d[0])
     if count > 1:
         return rotate(r, left, count-1)
