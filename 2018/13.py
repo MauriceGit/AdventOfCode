@@ -11,7 +11,7 @@ corner_map_2 = {(-1,0): (0,1), (0,-1): (1,0), (1,0): (0,-1), (0,1): (-1,0)}
 # player dir map
 dir_map = {"<": (-1,0), ">": (1,0), "^": (0,-1), "v": (0,1)}
 rev_dir_map = {v:k for k,v in dir_map.items()}
-# keep direction!
+# keep direction so we don't need any if-else and can just apply the direction update map
 dir_map_normal = {k:k for k in [(0,-1), (-1,0), (1,0), (0,1)]}
 
 
@@ -30,12 +30,8 @@ def pp(field, carts):
         print("")
 
 
-
-
-
 # only works on sorted cart list
 def find_collision(carts):
-
     for i, c1 in enumerate(carts):
         for j, c2 in enumerate(carts):
             if c1 != c2 and c1[0] == c2[0]:
@@ -43,13 +39,61 @@ def find_collision(carts):
     return None
 
 
+def run(field, carts):
+    print_first_part = True
+    final_round = False
+
+    while True:
+        carts.sort(key=lambda x: (x[0][1], x[0][0]))
+
+        # so we can savely iterate carts while removing from the list at the same time.
+        # avoid index juggling at the cost of some performance.
+        tmp = carts.copy()
+
+        while len(tmp) > 0:
+            c = tmp.pop(0)
+            i = carts.index(c)
+
+            # update position
+            carts[i][0] = add(c[0], c[1])
+
+            # cross road --> direction update
+            if field[carts[i][0]][1]:
+                # not straight ahead
+                new_dir = c[1]
+                if c[2] != 1:
+                    new_dir = rotate(c[1], False, count=1 if c[2] == 0 else 3)
+                carts[i][1] = new_dir
+                carts[i][2] = (c[2]+1)%3
+            else:
+                carts[i][1] = field[carts[i][0]][0][c[1]]
+
+            p = find_collision(carts)
+            if p:
+                if print_first_part:
+                    print("{},{}".format(*p[0][0]))
+                print_first_part = False
+
+                carts.remove(p[0])
+                carts.remove(p[1])
+                if p[0] in tmp:
+                    tmp.remove(p[0])
+                if p[1] in tmp:
+                    tmp.remove(p[1])
+
+                if len(carts) == 1:
+                    final_round = True
+
+        if final_round:
+            print("{},{}".format(*carts[0][0]))
+            return
+
 
 def main():
 
     lines = open_data("13.data")
 
-    # (x,y) -> direction and if it is a cross-section
-    # (5,6) -> (corner-dict(), is_crossing)
+    # (x,y) -> (corner-dict(), is_crossing)
     field = dict()
     # list of positions and current direction: [[(5,6), (1,0), cross_type: 0->left, 1->straight, 2->right]]
     carts = []
@@ -64,71 +108,8 @@ def main():
                 field[(x,y)] = (corner_map_1, False)
             elif c == "/":
                 field[(x,y)] = (corner_map_2, False)
-            else:
-                pass
-                #print("WHAT IS THIS: '{}'".format(c))
 
-    print_first_part = False
-    final_round = False
-
-    #pp(field, carts)
-    while True:
-    #for i in range(20):
-
-        carts.sort(key=lambda x: (x[0][1], x[0][0]))
-        tmp = carts.copy()
-
-        #for i, c in enumerate(carts):
-
-        while len(tmp) > 0:
-            c = tmp.pop(0)
-            i = carts.index(c)
-
-            carts[i][0] = add(c[0], c[1])
-
-            # cross road
-            if field[carts[i][0]][1]:
-                # not straight ahead
-                new_dir = c[1]
-                if c[2] != 1:
-                    new_dir = rotate(c[1], False, count= 1 if c[2] == 0 else 3)
-                carts[i][1] = new_dir
-                carts[i][2] = (c[2]+1)%3
-
-            else:
-                #print(field[carts[i][0]][0], c[0])
-                carts[i][1] = field[carts[i][0]][0][c[1]]
-
-
-
-            p = find_collision(carts)
-            if p:
-
-                if not print_first_part:
-                    print("{},{}".format(*p[0][0]))
-                print_first_part = True
-
-                carts.remove(p[0])
-                carts.remove(p[1])
-                if p[0] in tmp:
-                    tmp.remove(p[0])
-                if p[1] in tmp:
-                    tmp.remove(p[1])
-
-                if len(carts) == 1:
-                    #print("{},{}".format(*carts[0][0]))
-                    final_round = True
-
-        #pp(field, carts)
-
-        if final_round:
-            print("{},{}".format(*carts[0][0]))
-            return
-
-
-
-
-
+    run(field, carts)
 
 if __name__ == "__main__":
     main()
