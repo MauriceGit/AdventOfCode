@@ -33,4 +33,4 @@ if __name__ == "__main__":
 
 # year 2018
 # solution for 14.01: 2103141159
-# solution for 14.02: ?
+# solution for 14.02: 20165734
