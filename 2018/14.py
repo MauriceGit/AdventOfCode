@@ -19,7 +19,7 @@ def main():
 
         tmp = scores[-7:]
         if str(rounds) in tmp:
-            print(len(scores) - (6 if str(rounds) == tmp[:-1] else 7))
+            print(len(scores) - (7 if str(rounds) == tmp[:-1] else 6))
             return
 
         scores += str(int(scores[c0]) + int(scores[c1]))
