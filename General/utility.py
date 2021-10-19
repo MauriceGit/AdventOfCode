@@ -46,6 +46,8 @@ from networkx.algorithms.shortest_paths.weighted import single_source_dijkstra
 #
 # nx.shortest_path_length(graph, node1, node2)
 #
+# nx.all_shortest_paths(graph, node1, node2)
+#
 # nx.shortest_path(graph, node1, node2)
 #
 # step_count, steps = single_source_dijkstra(graph, "AA", "ZZ")
@@ -121,10 +123,10 @@ def rotate(d, left, count=1):
 
 # Adds edge from p in direction d, if there is a node at p+d
 def add_edge(graph, p, d):
+    if p not in graph:
+        graph.add_node(p)
     if add(p, d) in graph:
         graph.add_edge(p, add(p, d), weight=1)
-    else:
-        graph.add_node(p)
 
 # Adds edges to all neighbors (if there are any)
 def add_surrounding_edge(graph, p):
