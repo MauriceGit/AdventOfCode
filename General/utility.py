@@ -95,6 +95,9 @@ def sub(p, p2):
 def div(p, f):
     return (p[0]//f if f else 0, p[1]//f if f else 0)
 
+def length(p):
+    return math.sqrt(p[0]*p[0] + p[1]*p[1])
+
 # Returns a dictionary of number/letter -> direction vector. For reading direction strings directly.
 def direction_map(direction=None):
     if direction == None:
