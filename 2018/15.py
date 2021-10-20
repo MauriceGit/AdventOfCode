@@ -82,6 +82,7 @@ def run(lines):
     rounds = 0
     while True:
         units.sort(key=lambda x: (x[0][1], x[0][0]))
+        print(units)
         if not run_round(graph, units):
             break
         rounds += 1
