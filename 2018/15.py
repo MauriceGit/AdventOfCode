@@ -5,14 +5,54 @@ sys.path.append('../General')
 from utility import *
 import copy
 
+# bfs with one specific target position!
+def bfs_target(field, units, start_pos, target_pos):
+    reading_order = [(0,-1), (-1,0), (1,0), (0,1)]
+    backtrack = {start_pos: -1}
+    visited = set([u[0] for u in units])
+    candidates = [start_pos]
+
+    while len(candidates) > 0:
+        c = candidates.pop(0)
+        if c == target_pos:
+            break
+
+        for r in reading_order:
+            new_pos = add(c,r)
+            if new_pos in visited or new_pos not in field:
+                continue
+
+            candidates.append(new_pos)
+            backtrack[new_pos] = c
+            visited.add(new_pos)
+
+    path = []
+    p = backtrack[target]
+    while backtrack[p] != -1:
+        path.append(p)
+        p = backtrack[p]
+
+    return (path[-1], len(path)+1) if len(path) > 0 else None, 100000
+
+
 def bfs(field, units, current_pos, team):
 
+
     reading_order = [(0,-1), (-1,0), (1,0), (0,1)]
-    backtrack = {current_pos: -1}
-    visited = set([u[0] for u in units if u[2] == team])
-    candidates = [current_pos]
     enemies = {u[0] for u in units if u[2] != team}
-    target = None
+    enemies.sort(key=lambda x: (x[0][1], x[0][0]))
+    used_positions = {u[0] for u in units}
+
+    best_target_pos = ()
+    min_distance = 100000
+
+    for e in enemies:
+        for r in reading_order:
+            p = add(e[0], r)
+            if p in field and p not in used_positions:
+
+
+
 
     while len(candidates) > 0:
         c = candidates.pop(0)
