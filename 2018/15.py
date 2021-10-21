@@ -3,11 +3,11 @@
 import sys
 sys.path.append('../General')
 from utility import *
-
+import copy
 
 def bfs(field, units, current_pos, team):
 
-    reading_order = [(0,-1), (-1,0), (1, 0), (0, 1)]
+    reading_order = [(0,-1), (-1,0), (1,0), (0,1)]
     backtrack = {current_pos: -1}
     visited = set([u[0] for u in units if u[2] == team])
     candidates = [current_pos]
@@ -41,24 +41,21 @@ def bfs(field, units, current_pos, team):
     return path[-1] if len(path) > 0 else None
 
 
-def length2(p):
-    return abs(p[0]) + abs(p[1])
-
-
 def get_inrange_target(p, units, team):
-    t_index = -1
-    for i, u in enumerate(units):
-        if u[2] != team and length2(sub(u[0], p)) == 1 and (t_index == -1 or u[1] < units[t_index][1]):
-            t_index = i
-    return t_index
+
+    close_enemies = [u for u in units if u[2] != team and length(sub(u[0], p)) == 1]
+    close_enemies.sort(key=lambda x: (x[1], x[0][1], x[0][0]))
+
+    if len(close_enemies) == 0:
+        return -1
+
+    return units.index(close_enemies[0])
 
 
-def run_round(field, units):
+def run_round(field, units, attack_power):
 
     i = 0
     while i < len(units):
-        u = units[i]
-
         if all(x[2] == units[0][2] for x in units):
             return False
 
@@ -66,9 +63,9 @@ def run_round(field, units):
         if next_step != None:
             units[i][0] = next_step
 
-        target_index = get_inrange_target(units[i][0], units, u[2])
+        target_index = get_inrange_target(units[i][0], units, units[i][2])
         if target_index != -1:
-            units[target_index][1] -= 3
+            units[target_index][1] -= attack_power[units[i][2]]
             if units[target_index][1] <= 0:
                 del units[target_index]
                 if target_index < i:
@@ -76,6 +73,18 @@ def run_round(field, units):
         i += 1
 
     return True
+
+
+def run_fight(units, field, attack_power):
+    rounds = 0
+    while True:
+        units.sort(key=lambda x: (x[0][1], x[0][0]))
+        if not run_round(field, units, attack_power):
+            break
+        rounds += 1
+
+    return rounds * sum(x[1] for x in units)
+
 
 
 def run(lines):
@@ -89,14 +98,16 @@ def run(lines):
                 if c in "GE":
                     units.append([(x,y), 200, c == "E"])
 
-    rounds = 0
-    while True:
-        units.sort(key=lambda x: (x[0][1], x[0][0]))
-        if not run_round(field, units):
-            break
-        rounds += 1
+    print(run_fight(copy.deepcopy(units), field, {True: 3, False: 3}))
 
-    print((rounds) * sum(x[1] for x in units))
+    power = 4
+    while True:
+        cpy = copy.deepcopy(units)
+        res = run_fight(cpy, field, {True: power, False: 3})
+        if len([x for x in cpy if x[2]]) == len([x for x in units if x[2]]):
+            print(res, power)
+            break
+        power += 1
 
 
 def main():
@@ -108,7 +119,7 @@ def main():
         print()
 
 
-
+# 50912 < x < 51170
 
 if __name__ == "__main__":
     main()
