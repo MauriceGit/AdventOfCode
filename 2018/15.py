@@ -5,32 +5,45 @@ sys.path.append('../General')
 from utility import *
 
 
-# returns (target, path) for the closest target
-def closest_target(orig_graph, units, current_index):
+def bfs(field, units, current_pos, team):
 
-    all_paths = []
-    for i,t in enumerate(units):
-        if i == current_index or units[current_index][2] == t[2]:
-            continue
+    reading_order = [(0,-1), (-1,0), (1, 0), (0, 1)]
+    backtrack = {current_pos: -1}
+    visited = set([u[0] for u in units if u[2] == team])
+    candidates = [current_pos]
+    enemies = {u[0] for u in units if u[2] != team}
+    target = None
 
-        # so that we can't run through other players
-        graph = orig_graph.copy()
-        graph.remove_nodes_from([x[0] for j,x in enumerate(units) if current_index != j and j != i])
-        try:
-            paths = list(nx.all_shortest_paths(graph, units[current_index][0], t[0]))
-            paths.sort(key=lambda x: (len(x), x[0][1], x[0][0]))
-            all_paths.append(paths[0])
-        except Exception as e:
-            pass
+    while len(candidates) > 0:
+        c = candidates.pop(0)
+        if c in enemies:
+            target = c
+            break
 
-    all_paths.sort(key=lambda x: (len(x), x[0][1], x[0][0]))
+        for r in reading_order:
+            new_pos = add(c,r)
+            if new_pos in visited or new_pos not in field:
+                continue
 
-    # first node is the current node, last node is the target node!
-    # leave the target node in so we know where enemies are
-    return [] if len(all_paths) == 0 else all_paths[0][1:][:-1]
+            candidates.append(new_pos)
+            backtrack[new_pos] = c
+            visited.add(new_pos)
+
+    if target == None:
+        return None
+
+    path = []
+    p = backtrack[target]
+    while backtrack[p] != -1:
+        path.append(p)
+        p = backtrack[p]
+
+    return path[-1] if len(path) > 0 else None
+
 
 def length2(p):
     return abs(p[0]) + abs(p[1])
+
 
 def get_inrange_target(p, units, team):
     t_index = -1
@@ -40,7 +53,7 @@ def get_inrange_target(p, units, team):
     return t_index
 
 
-def run_round(graph, units):
+def run_round(field, units):
 
     i = 0
     while i < len(units):
@@ -49,9 +62,9 @@ def run_round(graph, units):
         if all(x[2] == units[0][2] for x in units):
             return False
 
-        path = closest_target(graph, units, i)
-        if len(path) > 0:
-            units[i][0] = path[0]
+        next_step = bfs(field, units, units[i][0], units[i][2])
+        if next_step != None:
+            units[i][0] = next_step
 
         target_index = get_inrange_target(units[i][0], units, u[2])
         if target_index != -1:
@@ -65,30 +78,24 @@ def run_round(graph, units):
     return True
 
 
-
 def run(lines):
-    graph = nx.Graph()
-    # (pos, health, team)
     units = []
+    field = dict()
 
     for y, l in enumerate(lines):
         for x, c in enumerate(l):
             if c != "#":
-                graph.add_node((x,y))
-                add_surrounding_edge(graph, (x,y))
+                field[(x,y)] = 1
                 if c in "GE":
                     units.append([(x,y), 200, c == "E"])
 
     rounds = 0
     while True:
         units.sort(key=lambda x: (x[0][1], x[0][0]))
-        print(units)
-        if not run_round(graph, units):
+        if not run_round(field, units):
             break
         rounds += 1
 
-    print(units)
-    print(rounds)
     print((rounds) * sum(x[1] for x in units))
 
 
@@ -107,5 +114,5 @@ if __name__ == "__main__":
     main()
 
 # year 2018
-# solution for 15.01: ?
+# solution for 15.01: 257954
 # solution for 15.02: ?
