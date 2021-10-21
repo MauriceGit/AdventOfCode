@@ -5,6 +5,7 @@ sys.path.append('../General')
 from utility import *
 import copy
 
+
 # bfs with one specific target position!
 def bfs_target(field, units, start_pos, target_pos):
     reading_order = [(0,-1), (-1,0), (1,0), (0,1)]
@@ -26,59 +27,38 @@ def bfs_target(field, units, start_pos, target_pos):
             backtrack[new_pos] = c
             visited.add(new_pos)
 
+    if target_pos not in backtrack:
+        return (None, 100000)
+
     path = []
-    p = backtrack[target]
+    p = target_pos
     while backtrack[p] != -1:
         path.append(p)
         p = backtrack[p]
 
-    return (path[-1], len(path)+1) if len(path) > 0 else None, 100000
+    return (path[-1], len(path)+1) if len(path) > 0 else (None, 100000)
 
 
 def bfs(field, units, current_pos, team):
 
-
     reading_order = [(0,-1), (-1,0), (1,0), (0,1)]
-    enemies = {u[0] for u in units if u[2] != team}
-    enemies.sort(key=lambda x: (x[0][1], x[0][0]))
+    enemies = [u[0] for u in units if u[2] != team]
+    enemies.sort(key=lambda x: (x[1], x[0]))
     used_positions = {u[0] for u in units}
 
-    best_target_pos = ()
+    best_step = None
     min_distance = 100000
 
     for e in enemies:
         for r in reading_order:
-            p = add(e[0], r)
+            p = add(e, r)
             if p in field and p not in used_positions:
+                step, dist = bfs_target(field, units, current_pos, p)
+                if dist < min_distance:
+                    best_step = step
+                    min_distance = dist
 
-
-
-
-    while len(candidates) > 0:
-        c = candidates.pop(0)
-        if c in enemies:
-            target = c
-            break
-
-        for r in reading_order:
-            new_pos = add(c,r)
-            if new_pos in visited or new_pos not in field:
-                continue
-
-            candidates.append(new_pos)
-            backtrack[new_pos] = c
-            visited.add(new_pos)
-
-    if target == None:
-        return None
-
-    path = []
-    p = backtrack[target]
-    while backtrack[p] != -1:
-        path.append(p)
-        p = backtrack[p]
-
-    return path[-1] if len(path) > 0 else None
+    return best_step
 
 
 def get_inrange_target(p, units, team):
@@ -99,11 +79,13 @@ def run_round(field, units, attack_power):
         if all(x[2] == units[0][2] for x in units):
             return False
 
-        next_step = bfs(field, units, units[i][0], units[i][2])
-        if next_step != None:
-            units[i][0] = next_step
-
         target_index = get_inrange_target(units[i][0], units, units[i][2])
+        if target_index == -1:
+            next_step = bfs(field, units, units[i][0], units[i][2])
+            if next_step != None:
+                units[i][0] = next_step
+
+            target_index = get_inrange_target(units[i][0], units, units[i][2])
         if target_index != -1:
             units[target_index][1] -= attack_power[units[i][2]]
             if units[target_index][1] <= 0:
@@ -117,14 +99,15 @@ def run_round(field, units, attack_power):
 
 def run_fight(units, field, attack_power):
     rounds = 0
+
     while True:
         units.sort(key=lambda x: (x[0][1], x[0][0]))
+
         if not run_round(field, units, attack_power):
             break
         rounds += 1
 
     return rounds * sum(x[1] for x in units)
-
 
 
 def run(lines):
@@ -142,10 +125,11 @@ def run(lines):
 
     power = 4
     while True:
+
         cpy = copy.deepcopy(units)
         res = run_fight(cpy, field, {True: power, False: 3})
         if len([x for x in cpy if x[2]]) == len([x for x in units if x[2]]):
-            print(res, power)
+            print(res)
             break
         power += 1
 
@@ -159,11 +143,9 @@ def main():
         print()
 
 
-# 50912 < x < 51170
-
 if __name__ == "__main__":
     main()
 
 # year 2018
 # solution for 15.01: 257954
-# solution for 15.02: ?
+# solution for 15.02: 51041
