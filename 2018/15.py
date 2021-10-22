@@ -7,7 +7,7 @@ import copy
 
 
 # bfs with one specific target position!
-def bfs_target(field, units, start_pos, target_pos):
+def bfs_targets(field, units, start_pos, targets):
     reading_order = [(0,-1), (-1,0), (1,0), (0,1)]
     backtrack = {start_pos: -1}
     visited = set([u[0] for u in units])
@@ -15,8 +15,10 @@ def bfs_target(field, units, start_pos, target_pos):
 
     while len(candidates) > 0:
         c = candidates.pop(0)
-        if c == target_pos:
-            break
+        if c in targets:
+            del targets[targets.index(c)]
+            if len(targets) == 0:
+                break
 
         for r in reading_order:
             new_pos = add(c,r)
@@ -26,6 +28,8 @@ def bfs_target(field, units, start_pos, target_pos):
             candidates.append(new_pos)
             backtrack[new_pos] = c
             visited.add(new_pos)
+
+    return backtrack
 
     if target_pos not in backtrack:
         return (None, 100000)
@@ -48,6 +52,11 @@ def bfs(field, units, current_pos, team):
 
     best_step = None
     min_distance = 100000
+
+    positions = [add(e,r) for e in enemies for r in reading_order]
+    positions = [e for e in positions if e in field and e not in used_positions]
+
+    backtrack = bfs_targets()
 
     for e in enemies:
         for r in reading_order:
