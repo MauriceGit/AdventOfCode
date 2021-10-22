@@ -31,16 +31,20 @@ def bfs_targets(field, units, start_pos, targets):
 
     return backtrack
 
-    if target_pos not in backtrack:
-        return (None, 100000)
 
-    path = []
-    p = target_pos
-    while backtrack[p] != -1:
-        path.append(p)
-        p = backtrack[p]
+def get_first_step(backtrack, start, target):
 
-    return (path[-1], len(path)+1) if len(path) > 0 else (None, 100000)
+    if target not in backtrack:
+        return None, 100000
+
+    count = 0
+    step = None
+    while backtrack[target] != -1:
+        step = target
+        count += 1
+        target = backtrack[target]
+
+    return step, count
 
 
 def bfs(field, units, current_pos, team):
@@ -53,19 +57,19 @@ def bfs(field, units, current_pos, team):
     best_step = None
     min_distance = 100000
 
-    positions = [add(e,r) for e in enemies for r in reading_order]
-    positions = [e for e in positions if e in field and e not in used_positions]
+    targets = [add(e,r) for e in enemies for r in reading_order]
+    targets = [e for e in targets if e in field and e not in used_positions]
 
-    backtrack = bfs_targets()
+    # we bundle the bfs and let it run for all targets. That way we already
+    # cache the results for all targets with one run instead of n times restarting
+    # the bfs again from the start.
+    backtrack = bfs_targets(field, units, current_pos, targets.copy())
 
-    for e in enemies:
-        for r in reading_order:
-            p = add(e, r)
-            if p in field and p not in used_positions:
-                step, dist = bfs_target(field, units, current_pos, p)
-                if dist < min_distance:
-                    best_step = step
-                    min_distance = dist
+    for t in targets:
+        step, dist = get_first_step(backtrack, current_pos, t)
+        if dist < min_distance:
+            best_step = step
+            min_distance = dist
 
     return best_step
 
@@ -108,10 +112,8 @@ def run_round(field, units, attack_power):
 
 def run_fight(units, field, attack_power):
     rounds = 0
-
     while True:
         units.sort(key=lambda x: (x[0][1], x[0][0]))
-
         if not run_round(field, units, attack_power):
             break
         rounds += 1
@@ -119,7 +121,9 @@ def run_fight(units, field, attack_power):
     return rounds * sum(x[1] for x in units)
 
 
-def run(lines):
+def main():
+
+    lines = open_data("15.data")
     units = []
     field = dict()
 
@@ -134,22 +138,12 @@ def run(lines):
 
     power = 4
     while True:
-
         cpy = copy.deepcopy(units)
         res = run_fight(cpy, field, {True: power, False: 3})
         if len([x for x in cpy if x[2]]) == len([x for x in units if x[2]]):
             print(res)
             break
         power += 1
-
-
-def main():
-
-    groups = open_data_groups("15.data")
-
-    for g in groups:
-        run(g)
-        print()
 
 
 if __name__ == "__main__":
