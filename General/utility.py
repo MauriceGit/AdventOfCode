@@ -152,6 +152,9 @@ def lcm(a,b):
 def lmap(f, *iterables):
     return list(map(f, *iterables))
 
+def lfilter(f, *iterables):
+    return list(filter(f, *iterables))
+
 def ints(s):
     if type(s) == str:
         return lmap(int, re.findall(r"-?\d+", s))
