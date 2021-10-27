@@ -39,11 +39,11 @@ def fill(field, visited, p, d):
         if valid(field, visited, add(p, (0, 1))):
             return p
 
-
         visited.add(p)
         p = add(p, d)
 
     return None
+
 
 def needs_filling_up(field, visited, p, d):
     while p not in field:
@@ -98,7 +98,27 @@ def run_water(field, max_y, spring_pos):
 
                 node = backtrack[node]
 
+    return visited
 
+
+def is_standing_water(field, visited, p, d):
+    water = set()
+    while True:
+        if p not in visited and p not in field:
+            return False, water
+        if p in field:
+            return True, water
+        water.add(p)
+        p = add(p, d)
+    return False, water
+
+
+def remove_running_water(field, visited):
+    for w in visited.copy():
+        left,  w_l = is_standing_water(field, visited, w, (-1,0))
+        right, w_r = is_standing_water(field, visited, w, ( 1,0))
+        if not left or not right:
+            visited = (visited - w_l) - w_r
     return visited
 
 
@@ -123,8 +143,10 @@ def main():
 
     visited = run_water(field, max_y, (500, 0))
     visited = set(lfilter(lambda x: x[1] >= min_y, visited))
-    #pp(field, visited)
 
+    print(len(visited))
+
+    visited = remove_running_water(field, visited)
     print(len(visited))
 
 
@@ -132,5 +154,5 @@ if __name__ == "__main__":
     main()
 
 # year 2018
-# solution for 17.01: ?
-# solution for 17.02: ?
+# solution for 17.01: 34541
+# solution for 17.02: 28000
