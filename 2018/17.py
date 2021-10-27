@@ -6,6 +6,26 @@ from utility import *
 from time import sleep
 
 
+def pp(field, visited):
+    combined = dict()
+
+    min_x = min(visited.keys(), key=lambda x: x[0])[0]
+    min_y = min(visited.keys(), key=lambda x: x[1])[1]
+    max_x = max(visited.keys(), key=lambda x: x[0])[0]
+    max_y = max(visited.keys(), key=lambda x: x[1])[1]
+
+    for x in range(min_x, max_x+1):
+        for y in range(min_y, max_y+1):
+            if (x,y) in field:
+                combined[(x,y)] = 1
+
+    for k in visited.keys():
+        combined[k] = 2
+
+    draw(combined,  {-1: " ", 1: "█", 2: "|"})
+    print("=========================================================================")
+
+
 def valid(field, visited, pos):
     return pos not in field and pos not in visited
 
@@ -33,25 +53,6 @@ def needs_filling_up(field, visited, p, d):
         p = add(p, d)
 
     return True
-
-def pp(field, visited):
-    combined = dict()
-
-    min_x = min(visited.keys(), key=lambda x: x[0])[0]
-    min_y = min(visited.keys(), key=lambda x: x[1])[1]
-    max_x = max(visited.keys(), key=lambda x: x[0])[0]
-    max_y = max(visited.keys(), key=lambda x: x[1])[1]
-
-    for x in range(min_x, max_x+1):
-        for y in range(min_y, max_y+1):
-            if (x,y) in field:
-                combined[(x,y)] = 1
-
-    for k in visited.keys():
-        combined[k] = 2
-
-    draw(combined,  {-1: " ", 1: "█", 2: "|"})
-    print("=========================================================================")
 
 
 def run_water(field, min_y, max_y, spring_pos):
@@ -117,9 +118,6 @@ def main():
 
         for x in range(min(a), max(a)+1):
             for y in range(min(b), max(b)+1):
-
-                # DEBUG
-                #if y <= 655:
                 field[(x,y)] = 1
 
     visited = run_water(field, 1, max(field.keys(), key=lambda x: x[1])[1], (500, 0))
@@ -131,6 +129,7 @@ def main():
 
     # < 444305
     # <  65377
+    # <  34544
 
 if __name__ == "__main__":
     main()

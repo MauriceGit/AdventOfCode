@@ -90,7 +90,7 @@ def mul(p, s):
     return (p[0]*s, p[1]*s)
 
 def sub(p, p2):
-    return (p2[0]-p[0], p2[1]-p[1])
+    return (p[0]-p2[0], p[1]-p2[1])
 
 def div(p, f):
     return (p[0]//f if f else 0, p[1]//f if f else 0)
