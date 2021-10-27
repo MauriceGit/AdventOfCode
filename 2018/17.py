@@ -9,17 +9,17 @@ from time import sleep
 def pp(field, visited):
     combined = dict()
 
-    min_x = min(visited.keys(), key=lambda x: x[0])[0]
-    min_y = min(visited.keys(), key=lambda x: x[1])[1]
-    max_x = max(visited.keys(), key=lambda x: x[0])[0]
-    max_y = max(visited.keys(), key=lambda x: x[1])[1]
+    min_x = min(visited, key=lambda x: x[0])[0]
+    min_y = min(visited, key=lambda x: x[1])[1]
+    max_x = max(visited, key=lambda x: x[0])[0]
+    max_y = max(visited, key=lambda x: x[1])[1]
 
     for x in range(min_x, max_x+1):
         for y in range(min_y, max_y+1):
             if (x,y) in field:
                 combined[(x,y)] = 1
 
-    for k in visited.keys():
+    for k in visited:
         combined[k] = 2
 
     draw(combined,  {-1: " ", 1: "█", 2: "|"})
@@ -40,7 +40,7 @@ def fill(field, visited, p, d):
             return p
 
 
-        visited[p] = True
+        visited.add(p)
         p = add(p, d)
 
     return None
@@ -55,9 +55,9 @@ def needs_filling_up(field, visited, p, d):
     return True
 
 
-def run_water(field, min_y, max_y, spring_pos):
+def run_water(field, max_y, spring_pos):
 
-    visited = defaultdict(bool)
+    visited = set()
     front = [add(spring_pos, (0, 1))]
     backtrack = dict()
     backtrack[front[0]] = None
@@ -68,7 +68,7 @@ def run_water(field, min_y, max_y, spring_pos):
         if node in visited or node in field or node[1] > max_y:
             continue
 
-        visited[node] = True
+        visited.add(node)
         next_node = add(node, (0, 1))
 
         if valid(field, visited, next_node):
@@ -98,8 +98,6 @@ def run_water(field, min_y, max_y, spring_pos):
 
                 node = backtrack[node]
 
-        #pp(field, visited)
-        #sleep(0.2)
 
     return visited
 
@@ -120,16 +118,15 @@ def main():
             for y in range(min(b), max(b)+1):
                 field[(x,y)] = 1
 
-    visited = run_water(field, 1, max(field.keys(), key=lambda x: x[1])[1], (500, 0))
+    min_y = min(field.keys(), key=lambda x: x[1])[1]
+    max_y = max(field.keys(), key=lambda x: x[1])[1]
 
-    pp(field, visited)
+    visited = run_water(field, max_y, (500, 0))
+    visited = set(lfilter(lambda x: x[1] >= min_y, visited))
+    #pp(field, visited)
 
-    print(len(visited.keys()))
+    print(len(visited))
 
-
-    # < 444305
-    # <  65377
-    # <  34544
 
 if __name__ == "__main__":
     main()
