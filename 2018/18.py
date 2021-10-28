@@ -3,7 +3,7 @@
 import sys
 sys.path.append('../General')
 from utility import *
-from os import system
+
 
 def get_adjacent(field, pos):
     tmp = [field[add(pos,p)] for p in dir_list_8() if field[add(pos,p)] != -1]
