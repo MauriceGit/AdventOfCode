@@ -71,6 +71,32 @@ class VM:
         return self.registers[0]
 
 
+def run_decompiled(a):
+    c = d = e = f = 0
+
+    c = (c+2)*(c+2)*19*11 + (e+7)*22 + 13
+    if a != 0:
+        c += (27*28+29)*30*14*32
+        return c
+
+    a = 0
+    d = 1
+    f = 1
+    while True:
+        # d is a devisor of c
+        # so in the end, we are adding up all devisors of c.
+        # This is verified by part 1 of this day.
+        if d*f == c:
+            a += d
+        f += 1
+        if f > c:
+            d += 1
+            if d > c:
+                print(a)
+                return
+            f = 1
+
+
 def main():
 
     lines = open_data("19.data")
@@ -79,24 +105,16 @@ def main():
     commands = lmap(lambda x: x.split(" "), lines[1:])
     commands = [(c[0], *lmap(int, c[1:])) for c in commands]
 
-    vm = VM(ip, [0,0,0,0,0,0], commands)
-    print(vm.run())
+    # This works for the first part as well. But takes 6s instead of 0.5s.
+    # The decompiled version is just nicer...
+    #vm = VM(ip, [0,0,0,0,0,0], commands)
+    #print(vm.run())
 
-    # Took a long time to solve this one. Didn't do it without some help from reddit:
-    # https://old.reddit.com/r/adventofcode/comments/a7j9zc/2018_day_19_solutions/ec40xhf/
-    #
-    # The solution was, to look at how the registers and see how they look, when registers[0] changes!
-    # Then the numbers in column 4 look like prime factors of the numbers in column 3.
-    # Then it is easy to see, that column 0 just adds up the prime-factors from column 4.
-    # Therefore the easiest way to calculate the final result (what should be in column 1 at the end)
-    # by taking the number in column 3 --> 10551403 and using wolfram-alpha to calculate the prime-factors:
-    # [1, 19, 555337, 10551403] and adding them all up: 11106760. This is the final result!
-    #
-    # I tried translating the "assembly" into some higher-level form first but got hung up on
-    # the jumping/goto part of it. It took way too much time, annoyed me and I looked at the completely
-    # wrong parts of the code (loop indices, ...) and had a hard time to figure out, what exactly was
-    # happening here.
-    # As it isn't even christmas and I am doing it for fun, I had a look at some answers until it made more sense...
+    run_decompiled(0)
+
+    number = run_decompiled(1)
+    # add 1 and number itself as they are ommited from thie prime_factors function...
+    print(sum(prime_factors(number))+1+number)
 
 
 if __name__ == "__main__":

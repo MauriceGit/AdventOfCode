@@ -172,6 +172,24 @@ def floats(s):
 def unzip(l):
     return lmap(list, zip(*l))
 
+# Credit to: https://stackoverflow.com/questions/16996217/prime-factorization-list
+# Careful: This function omits 1 and n from the list (which is correct, but still!)
+def prime_factors(n):
+    l = []
+    if n < 2: return l
+    if n&1==0:
+        l.append(2)
+        while n&1==0: n>>=1
+    i = 3
+    m = int(math.sqrt(n))+1
+    while i < m:
+        if n%i==0:
+            l.append(i)
+            while n%i==0: n//=i
+        i+= 2
+        m = int(math.sqrt(n))+1
+    if n>2: l.append(n)
+    return l
 
 ############################### IO
 
