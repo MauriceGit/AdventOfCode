@@ -36,10 +36,7 @@ def main():
         for x in range(target[0]+1):
             risk_level += calc_erosion_level((x,y), target, depth) % 3
 
-
     print(risk_level)
-
-
 
 
 if __name__ == "__main__":
