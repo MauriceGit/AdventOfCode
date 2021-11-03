@@ -46,5 +46,5 @@ if __name__ == "__main__":
     main()
 
 # year 2018
-# solution for 22.01: ?
+# solution for 22.01: 7402
 # solution for 22.02: ?
