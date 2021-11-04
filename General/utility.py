@@ -92,6 +92,9 @@ def mul(p, s):
 def sub(p, p2):
     return (p[0]-p2[0], p[1]-p2[1])
 
+def sub3(p, p2):
+    return (p[0]-p2[0], p[1]-p2[1], p[2]-p2[2])
+
 def div(p, f):
     return (p[0]//f if f else 0, p[1]//f if f else 0)
 
