@@ -18,6 +18,7 @@ from recordtype import recordtype
 # example: Planet = recordtype("Planet", "p v")
 
 import math
+from math import sin, cos, ceil
 # example: math.ceil()
 
 from itertools import repeat, chain, islice, accumulate, permutations, combinations
@@ -100,6 +101,12 @@ def div(p, f):
 
 def length(p):
     return math.sqrt(p[0]*p[0] + p[1]*p[1])
+
+def rad_to_deg(a):
+    return a*180/math.pi
+
+def deg_to_rad(a):
+    return a*math.pi/180
 
 # Returns a dictionary of number/letter -> direction vector. For reading direction strings directly.
 def direction_map(direction=None):
