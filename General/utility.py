@@ -90,6 +90,9 @@ def add(p, p2):
 def mul(p, s):
     return (p[0]*s, p[1]*s)
 
+def mul3(p, s):
+    return (p[0]*s, p[1]*s, p[2]*s)
+
 def sub(p, p2):
     return (p[0]-p2[0], p[1]-p2[1])
 
