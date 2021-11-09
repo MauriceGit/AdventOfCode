@@ -78,20 +78,23 @@ from cachetools.keys import hashkey
 ############################### Vector calculations
 
 # Adds, but with 3 coordinates
-def add4(a,b):
-    return (a[0]+b[0], a[1]+b[1], a[2]+b[2], a[3]+b[3])
-
-def add3(a,b):
-    return (a[0]+b[0], a[1]+b[1], a[2]+b[2])
+#def add4(a,b):
+#    return (a[0]+b[0], a[1]+b[1], a[2]+b[2], a[3]+b[3])
+#
+#def add3(a,b):
+#    return (a[0]+b[0], a[1]+b[1], a[2]+b[2])
+#
+#def add(p, p2):
+#    return (p[0]+p2[0], p[1]+p2[1])
 
 def add(p, p2):
-    return (p[0]+p2[0], p[1]+p2[1])
+    return tuple(p[i]+p2[i] for i in range(len(p)))
+
+#def mul(p, s):
+#    return (p[0]*s, p[1]*s)
 
 def mul(p, s):
-    return (p[0]*s, p[1]*s)
-
-def mul3(p, s):
-    return (p[0]*s, p[1]*s, p[2]*s)
+    return tuple(x*s for x in p)
 
 def sub(p, p2):
     return (p[0]-p2[0], p[1]-p2[1])
@@ -99,8 +102,11 @@ def sub(p, p2):
 def sub3(p, p2):
     return (p[0]-p2[0], p[1]-p2[1], p[2]-p2[2])
 
+#def div(p, f):
+#    return (p[0]//f if f else 0, p[1]//f if f else 0)
+
 def div(p, f):
-    return (p[0]//f if f else 0, p[1]//f if f else 0)
+    return tuple(x/f if f else 0 for x in p)
 
 def length(p):
     return math.sqrt(p[0]*p[0] + p[1]*p[1])
