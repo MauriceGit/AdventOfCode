@@ -23,11 +23,11 @@ def find_coords(bots, start_pos, end_pos):
                 max_value = max(max_value, field[(x,y,z)])
 
     coords = lfilter(lambda x:x[1] == max_value, field.items())
-    dists = [(dist(c[0],(0,0,0)), c[0]) for c in coords]
-    dists.sort()
+    #dists = [(dist(c[0],(0,0,0)), c[0]) for c in coords]
+    #dists.sort()
+    #return dists[0][1]
 
-    return dists[0][1]
-
+    return [c[0] for c in coords]
 
 
 def main():
@@ -54,35 +54,55 @@ def main():
         max(nanobots, key=lambda x:x[0][1])[0][1],
         max(nanobots, key=lambda x:x[0][2])[0][2]
     )
-    #start_pos = add(start_pos, (-10000000, -10000000, -10000000))
-    #end_pos = add(end_pos, (1000000, 1000000, 1000000))
 
     start_pos = lmap(int, div(start_pos, factor))
     end_pos = lmap(int, div(end_pos, factor))
 
     print(start_pos, end_pos)
 
-    while True:
+    start_positions = [(start_pos, end_pos, factor)]
 
-        bots = [(lmap(int, div(p[0], factor)), p[1]/factor) for p in nanobots]
+    final_positions = []
 
-        start_pos = find_coords(bots, start_pos, end_pos)
-        end_pos = add(start_pos, (1,1,1))
-        print("start_pos: ", start_pos, end_pos)
+    while len(start_positions) > 0:
 
-        if factor == 1:
-            break
-        start_pos = lmap(int, mul(start_pos, 2))
-        end_pos   = lmap(int, mul(end_pos, 2))
-        factor //= 2
+        new_start_positions = []
+        start_positions.sort(key=lambda x: dist(x[0], (0,0,0))*x[2])
+        best = start_positions[0]
+        for p in start_positions:
+            if dist(p[0], (0,0,0))*p[2] <= dist(best[1], (0,0,0))*best[2]:
+                new_start_positions.append(p)
+        start_positions = new_start_positions
 
-    print("start_pos: ", start_pos)
-    print(sum(map(abs, start_pos)))
+        start, end, fac = start_positions.pop(0)
+
+        print(fac)
+
+        bots = [(lmap(int, div(p[0], fac)), p[1]/fac) for p in nanobots]
+
+        new_positions = find_coords(bots, start, end)
+
+        for p in new_positions:
+            if fac == 1:
+                final_positions.append(p)
+            else:
+                start_positions.append((lmap(int, mul(p, 2)), lmap(int, mul(add(p, (1,1,1)), 2)), fac//2))
+
+
+
+    final_positions.sort(key=lambda x: dist(x, (0,0,0)))
+
+    print([dist(x, (0,0,0)) for x in final_positions])
+
+    print("final: ", final_positions[0])
+    print(sum(map(abs, final_positions[0])))
 
     # <  156987769
     # != 148326432
     # != 148326435
     # != 156631040
+    # != 148632564
+    # != 148324352
     # >  9645141
 if __name__ == "__main__":
     main()
