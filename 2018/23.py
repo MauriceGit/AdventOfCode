@@ -55,6 +55,7 @@ def main():
         max(nanobots, key=lambda x:x[0][2])[0][2]
     )
 
+    bot_range = sub(end_pos, start_pos)
     start_pos = lmap(int, div(start_pos, factor))
     end_pos = lmap(int, div(end_pos, factor))
 
@@ -73,6 +74,7 @@ def main():
             if dist(p[0], (0,0,0))*p[2] <= dist(best[1], (0,0,0))*best[2]:
                 new_start_positions.append(p)
         start_positions = new_start_positions
+        start_positions.sort(key=lambda x: x[2], reverse=True)
 
         start, end, fac = start_positions.pop(0)
 
@@ -85,6 +87,8 @@ def main():
         for p in new_positions:
             if fac == 1:
                 final_positions.append(p)
+                #print(sum(map(abs, p)))
+                #return
             else:
                 start_positions.append((lmap(int, mul(p, 2)), lmap(int, mul(add(p, (1,1,1)), 2)), fac//2))
 
@@ -92,15 +96,15 @@ def main():
 
     final_positions.sort(key=lambda x: dist(x, (0,0,0)))
 
-    print([dist(x, (0,0,0)) for x in final_positions])
+    #print([dist(x, (0,0,0)) for x in final_positions])
 
     print("final: ", final_positions[0])
     print(sum(map(abs, final_positions[0])))
 
     # <  156987769
+    # != 156631040
     # != 148326432
     # != 148326435
-    # != 156631040
     # != 148632564
     # != 148324352
     # >  9645141
