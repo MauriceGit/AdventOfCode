@@ -44,7 +44,6 @@ def calc_damage(g, attacker):
     return (dmg, g.count*g.damage, g.initiative)
 
 
-# returns (key, group)
 def find_target(attacker, groups):
 
     def sort_key(g):
@@ -59,7 +58,7 @@ def find_target(attacker, groups):
 def pp(groups):
     def _pp(k, p):
         print(f"  {k: >2}: {p.count : <4} hp: {p.hit_points: <5} weak: {str(p.weak): <28} immune: {str(p.immune): <33} damage: {p.damage: <4} damage_type: {p.damage_type:<11} initiative: {p.initiative}")
-    print("Immunity:")
+    print("Immune System:")
     for k, p in groups.items():
         if p.team == 0:
             _pp(k, p)
@@ -68,6 +67,14 @@ def pp(groups):
         if p.team == 1:
             _pp(k, p)
     print()
+
+def someone_won(groups):
+    teams = [0,0]
+    for k, g in groups.items():
+        teams[g.team] += g.count
+    return teams[0] == 0 or teams[1] == 0
+
+
 
 def main():
 
@@ -81,39 +88,54 @@ def main():
         groups[i+len(immune)] = parse_attributes(g, 1)
 
     # as long as we have two teams!
-    while not all(g.team == list(groups.values())[0].team for g in groups.values()):
+    while not someone_won(groups):
 
         indices = list(groups.keys())
         indices.sort(key=lambda i: (groups[i].count*groups[i].damage, groups[i].initiative), reverse=True)
 
         pp(groups)
 
+        #for k, g in groups.items():
+        #    for k2, g2 in groups.items():
+        #        if g.team != g2.team:
+        #            dmg = calc_damage(g2, g)[0]
+        #            print(f"{'Infection' if g.team else 'Immune System'} group {k} would deal defending group {k2} {dmg} damage")
+        #print()
+
         # target selection
         selection = defaultdict(lambda: -1)
         for i in indices:
-            key, target = find_target(groups[i], [(k,v) for k,v in groups.items() if k not in selection.values()])
-            if target != None:
-                selection[i] = (key, calc_damage(target, groups[i])[0])
+            if groups[i].count > 0:
+                key, target = find_target(groups[i], [(k,v) for k,v in groups.items() if k not in selection.values()])
+                if target != None and key != -1:
+                    selection[i] = key
 
         # attacking
         indices.sort(key=lambda i: groups[i].initiative, reverse=True)
         for i in indices:
-            attacker = groups[i] if i in groups else None
-            print(selection[i])
-            if attacker != None and selection[i][0] != -1:
-                index, dmg = selection[i]
-                defender = groups[index]
-                #dmg = calc_damage(defender, attacker)[0]
-                killed_units = int(dmg // defender.hit_points)
+            #if groups[i].count > 0:
+                attacker = groups[i] if i in groups else None
+                if attacker != None and i in selection and selection[i] != -1:
+                    index = selection[i]
+                    defender = groups[index]
+                    dmg = calc_damage(defender, attacker)[0]
+                    killed_units = int(dmg // defender.hit_points)
+                    #killed_units = dmg
+                    if killed_units > defender.count:
+                        killed_units = defender.count
 
-                groups[index].count -= killed_units
-                if groups[index].count <= 0:
-                    del groups[index]
+                    #print(f"{'Infection' if attacker.team else 'Immune System'} group {i} attacks group {index}, killing {killed_units} units - {dmg}")
+
+                    groups[index].count -= killed_units
+                    if groups[index].count <= 0:
+                        groups[index].count = 0
+                        del groups[index]
 
 
-        #return
+        #print("\n=================================================\n")
 
-    print(groups)
+
+    pp(groups)
     print(sum(g.count for g in groups.values()))
 
     # > 742
