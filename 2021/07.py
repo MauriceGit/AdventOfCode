@@ -4,44 +4,24 @@ import sys
 sys.path.append('../General')
 from utility import *
 
-def calc_fuel(diff):
-    fuel = 0
-    n = 1
-    for i in range(diff):
-        fuel += n
-        n += 1
-    return fuel
+
+fuel_dist = {0:0}
+for i in range(1, 2000):
+    fuel_dist[i] = fuel_dist[i-1] + i
 
 
-fuel_dist = dict()
-for i in range(2000):
-    fuel_dist[i] = calc_fuel(i)
+def run(lines, f):
+    best_fuel = 10000000000000000000
+    for i in range(min(lines), max(lines)):
+        best_fuel = min(best_fuel, sum(f(abs(i-l)) for l in lines))
+    return best_fuel
 
 
 def main():
-
     lines = ints(open_data("07.data")[0])
-    #print(lines)
 
-    #best_pos  = -1
-    #best_fuel = 10000000
-    #for i in range(min(lines), max(lines)):
-    #    fuel = sum(abs(i-l) for l in lines)
-    #    if fuel < best_fuel:
-    #        best_fuel = fuel
-    #        best_pos = i
-    #print(best_fuel)
-
-    best_pos  = -1
-    best_fuel = 10000000000000000000
-    for i in range(min(lines), max(lines)):
-        fuel = sum(fuel_dist[abs(i-l)] for l in lines)
-
-        if fuel < best_fuel:
-            best_fuel = fuel
-            best_pos = i
-    print(best_fuel)
-
+    print(run(lines, lambda x: x))
+    print(run(lines, lambda x: fuel_dist[x]))
 
 
 if __name__ == "__main__":
