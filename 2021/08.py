@@ -5,32 +5,8 @@ sys.path.append('../General')
 from utility import *
 
 
-digits = ["cagedb", "ab", "gcdfa", "fbcad", "eafb", "cdfbe", "cdfgeb", "dab", "acedgfb", "cefabd"]
-
-
-def get_digit(s):
-    for i,d in enumerate(digits):
-        if set(d) == set(s):
-            return i
-    return None
-
-
-# fgc cgfbe ebgaf cbfa cgedbfa cf bgced gecfab defbag fgdcae | gfc cgf gbdfea fcg
-# cga bcadfge aefdgc edgca dafc gdafbe aefcbg agefd ca cdegb | debcg faecgb cga gac
-# dbcaf gcadebf eafcgb dbcefa gbdf cbfdga bcg adbcg gb edacg | afecbg cbg bfcad cabfdg
-
-def solve_mapping(inputs):
-    # int -> abcdefg...
-    mapping = {}
-    # int -> used_segments [int]*7
-    nums = {0: [0,1,2,4,5,6], 1: [2,5], 2: [0,2,3,4,6], 3: [0,2,3,5,6], 4: [1,2,3,5], 5:[0,1,3,5,6],
-            6: [0,1,3,4,5,6], 7: [0,2,5], 8: [0,1,2,3,4,5,6], 9: [0,1,2,3,5,6]}
-    # 0..6 -> set(a..g)
-    all_d = set("abcdefg")
+def solve_mapping(inputs, outputs):
     segments = {i: set("abcdefg") for i in range(7)}
-
-
-    inputs = ["fgc", "cgfbe", "ebgaf", "cbfa", "cgedbfa", "cf", "bgced", "gecfab", "defbag", "fgdcae"]
 
     inputs.sort(key=lambda x: len(x))
 
@@ -44,10 +20,39 @@ def solve_mapping(inputs):
         if len(i) == 4:
             segments[1] = set(i)-segments[2] - segments[0]
             segments[3] = set(i)-segments[2]
-        if len(i) == 5:
-            print(i)
+        if len(i) == 6:
+            if len(segments[2]) == 2 and len(set(i) & segments[2]) == 1:
+                segments[5] = set(i) & segments[2]
+                segments[2] -= segments[5]
 
-    print(segments)
+    mapping = {}
+    for i in inputs:
+        if len(i) == 2:
+            mapping[1] = set(i)
+        if len(i) == 3:
+            mapping[7] = set(i)
+        if len(i) == 4:
+            mapping[4] = set(i)
+        if len(i) == 5:
+            # 2,3,5
+            if len(set(i) & (segments[2] | segments[5])) == 2:
+                mapping[3] = set(i)
+            elif len(set(i) & segments[2]) == 1:
+                mapping[2] = set(i)
+            else:
+                mapping[5] = set(i)
+        if len(i) == 6:
+            # 0,6,9
+            if len(set(i) & (segments[2] | segments[5])) == 1:
+                mapping[6] = set(i)
+            elif len(set(inputs[2]) & set(i)) == 3:
+                mapping[0] = set(i)
+            else:
+                mapping[9] = set(i)
+        if len(i) == 7:
+            mapping[8] = set(i)
+
+    return int("".join([str(k) for o in outputs for k,v in mapping.items() if set(o) == v]))
 
 
 def main():
@@ -58,31 +63,17 @@ def main():
     inputs = []
 
     for l in lines:
-        output.append(l.split(" | ")[1].split(" "))
         inputs.append(l.split(" | ")[0].split(" "))
+        output.append(l.split(" | ")[1].split(" "))
 
+    print(sum(len(tmp) in [2,4,3,7] for o in output for tmp in o))
 
+    print(sum(solve_mapping(inputs[i], output[i]) for i in range(len(inputs))))
 
-    count = 0
-    for o in output:
-        for tmp in o:
-            count += int(len(tmp) in [2,4,3,7])
-
-    print(count)
-
-    solve_mapping("")
-    return
-
-    for o in output:
-        s = ""
-        for tmp in o:
-            s += str(get_digit(tmp))
-
-        print(s)
 
 if __name__ == "__main__":
     main()
 
 # year 2021
-# solution for 08.01: ?
-# solution for 08.02: ?
+# solution for 08.01: 352
+# solution for 08.02: 936117
