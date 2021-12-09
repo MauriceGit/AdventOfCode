@@ -5,19 +5,14 @@ sys.path.append('../General')
 from utility import *
 
 
-
 def bfs(field, pos):
-
     basin = set()
     queue = [pos]
 
     while len(queue) > 0:
         p = queue.pop(0)
-
         basin.add(p)
-
         neighbors = [add(p, (-1,0)), add(p, (1,0)), add(p, (0,-1)), add(p, (0,1))]
-
         for n in neighbors:
             if field[n] >= field[p] and field[n] < 9 and n not in basin:
                 queue.append(n)
@@ -43,12 +38,8 @@ def main():
 
     print(sum(low_points))
 
-    basins = []
-    for p in low_point_pos:
-        basins.append(bfs(field, p))
-
-    basins.sort(key=lambda x:len(x))
-    print(len(basins[-1])*len(basins[-2])*len(basins[-3]))
+    basins = [bfs(field, p) for p in low_point_pos]
+    print(reduce(lambda x,y: x*y, sorted(lmap(len, basins))[-3:]))
 
 
 if __name__ == "__main__":
