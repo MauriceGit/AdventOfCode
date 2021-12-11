@@ -21,7 +21,7 @@ import math
 from math import sin, cos, ceil
 # example: math.ceil()
 
-from itertools import repeat, chain, islice, accumulate, permutations, combinations
+from itertools import repeat, chain, islice, accumulate, permutations, combinations, count
 # examples:
 #
 # accumulate([1,2,3,4,5]) --> 1 3 6 10 15
@@ -38,6 +38,9 @@ from itertools import repeat, chain, islice, accumulate, permutations, combinati
 # permutations('ABCD', 2) --> AB AC AD BA BC BD CA CB CD DA DB DC
 #
 # combinations('ABCD', 2) --> AB AC AD BC BD CD
+#
+# for i in itertools.count:
+#    unbounded for loop! With index assigned to i. Awesome!
 
 import networkx as nx
 from networkx.algorithms.shortest_paths.weighted import single_source_dijkstra
@@ -242,12 +245,10 @@ def draw(f, symbols=None, print_directly=False, flip=False):
             else:
                 c = f[p]
 
+            if print_directly:
+                symbols[c] = c
             if c not in symbols:
-                if print_directly:
-                    symbols[c] = c
-                else:
-                    symbols[c] = "?"
-
+                symbols[c] = "?"
             print(symbols[c], end="")
 
         print("")
