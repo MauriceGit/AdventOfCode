@@ -3,40 +3,30 @@
 import sys
 sys.path.append('../General')
 from utility import *
-from copy import deepcopy
 
 
+def valid_part_1(path):
+    c = Counter(path)
+    return max(c.values()) <= 1
 
-def is_invalid(visited, visit_at_most):
-    tmp = lfilter(lambda x: x >= visit_at_most, visited.values())
-    return visited["start"] > 2 or max(visited.values()) > 2 or len(tmp) > 1
+
+def valid_part_2(path):
+    c = Counter(path)
+    tmp = [v for v in c.values() if v >= 2]
+    return max(c.values()) <= 2 and len(tmp) <= 1
 
 
-def find_paths(graph, visit_at_most):
+def find_paths_dfs(graph, current_node, path, valid):
 
-    # current_node, last_node, visited
-    queue = [("start", defaultdict(int, {"start": 1}))]
-    found_paths = 0
-    all_paths = []
+    if current_node == "end":
+        return 1
 
-    while len(queue) > 0:
-        node, visited = queue.pop(0)
-
-        if node == "end":
-            found_paths += 1
-            continue
-
-        if node.islower():
-            visited[node] += 1
-
-        for next_node in graph[node]:
-
-            if next_node == "start" or next_node in visited and is_invalid(visited, visit_at_most):
-                continue
-
-            queue.append((next_node, visited.copy()))
-
-    return found_paths
+    count = 0
+    for next_node in graph[current_node]:
+        new_path = path + [next_node] if next_node.islower() else path
+        if next_node != "start" and valid(new_path):
+            count += find_paths_dfs(graph, next_node, new_path, valid)
+    return count
 
 
 def main():
@@ -49,13 +39,13 @@ def main():
         graph[s].append(d)
         graph[d].append(s)
 
-    print(find_paths(graph, 1))
-    print(find_paths(graph, 2))
+    print(find_paths_dfs(graph, "start", ["start"], valid_part_1))
+    print(find_paths_dfs(graph, "start", ["start"], valid_part_2))
 
 
 if __name__ == "__main__":
     main()
 
 # year 2021
-# solution for 12.01: ?
-# solution for 12.02: ?
+# solution for 12.01: 4338
+# solution for 12.02: 114189
