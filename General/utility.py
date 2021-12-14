@@ -9,8 +9,11 @@ from operator import itemgetter
 
 import re
 
-from collections import defaultdict, Counter
+from collections import defaultdict, Counter, deque
 # Counter() creates a dictionary with "elem: count" for each element in the list.
+#
+# deque: --> doubly linked list!
+# append, appendleft, rotate(n=1), pop, popleft. Can be accessed just like a list with []!
 
 from fractions import gcd
 
