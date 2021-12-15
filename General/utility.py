@@ -49,6 +49,7 @@ import networkx as nx
 from networkx.algorithms.shortest_paths.weighted import single_source_dijkstra
 #
 # graph = nx.Graph()
+# graph = nx.DiGraph() # Creates a directed graph!!!
 # add_surrounding_edge(graph, ...)
 #
 # nx.shortest_path_length(graph, node1, node2)
