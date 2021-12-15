@@ -4,33 +4,29 @@ import sys
 sys.path.append('../General')
 from utility import *
 
+
 def fill_field(lines, field, x_diff, y_diff, increase):
     for y,l in enumerate(lines):
         for x,v in enumerate(l):
-            print(field == None)
-            field[(x+x_diff,y+y_diff)] = (int(v)+increase)%9
+            value = (int(v)+increase)%10
+            value += 1 if int(v)+increase >= 10 else 0
+            field[(x+x_diff,y+y_diff)] = value
 
-def main():
 
-    lines = open_data("15.data")
-
+def create_field(lines, repeat=1):
     field = defaultdict(lambda: 1000)
-    for y,l in enumerate(lines):
-        for x,v in enumerate(l):
-            field[(x,y)] = int(v)
     w = len(lines[0])
     h = len(lines)
+    for i in range(repeat):
+        for j in range(repeat):
+            fill_field(lines, field, i*w, j*h, i+j)
+    w *= repeat
+    h *= repeat
+    return field, w, h
 
-    fold = 5
-    for i in range(fold):
-        for j in range(fold):
-            field = fill_field(lines, field, i*w, j*h, i+j)
 
-    w *= fold
-    h *= fold
-
+def create_graph_from_field(field, w, h):
     graph = nx.DiGraph()
-
     for y in range(h):
         for x in range(w):
             pos = (x,y)
@@ -38,12 +34,21 @@ def main():
                 new_pos = add(pos, d)
                 graph.add_edge(pos, new_pos, weight=field[new_pos])
                 graph.add_edge(new_pos, pos, weight=field[pos])
+    return graph
 
-    shortest_path_length = nx.shortest_path_length(graph, (0,0), (w-1,h-1), weight='weight')
-    #shortest_path = nx.shortest_path(graph, (0,0), (w-1,h-1), weight='weight')
 
-    print(shortest_path_length)
+def calc_best_path(lines, repeat=1):
+    field, w, h = create_field(lines, repeat=repeat)
+    graph = create_graph_from_field(field, w, h)
+    return nx.shortest_path_length(graph, (0,0), (w-1,h-1), weight='weight')
 
+
+def main():
+
+    lines = open_data("15.data")
+
+    print(calc_best_path(lines))
+    print(calc_best_path(lines, repeat=5))
 
 
 if __name__ == "__main__":
@@ -51,4 +56,4 @@ if __name__ == "__main__":
 
 # year 2021
 # solution for 15.01: 447
-# solution for 15.02: ?
+# solution for 15.02: 2825
