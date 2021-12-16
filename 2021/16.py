@@ -47,18 +47,6 @@ def parse_packet(bits, i):
     return (version, type_id, packets), i
 
 
-def parse(bits):
-    i = 0
-    packets = []
-    while True:
-        if i >= len(bits) or int(bits[i:], 2) == 0:
-            break
-        packet, i = parse_packet(bits, i)
-        packets.append(packet)
-
-    return packets
-
-
 def evaluate(p):
 
     if p[1] == 4:
@@ -69,7 +57,7 @@ def evaluate(p):
     if p[1] == 0:
         return sum(sub_packets)
     elif p[1] == 1:
-        return reduce(mul, sub_packets)
+        return reduce(operator.mul, sub_packets)
     elif p[1] == 2:
         return min(sub_packets)
     elif p[1] == 3:
@@ -95,10 +83,10 @@ def main():
     lines = open_data("16.data")
 
     bits = "".join(format(int(c, 16), "04b") for c in lines[0])
-    packets = parse(bits)
+    packet, _ = parse_packet(bits, 0)
 
-    print(version_sum(packets))
-    print(evaluate(packets[0]))
+    print(version_sum([packet]))
+    print(evaluate(packet))
 
 
 if __name__ == "__main__":

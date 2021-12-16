@@ -5,7 +5,8 @@ from collections import namedtuple
 
 from functools import lru_cache, reduce
 
-from operator import itemgetter, mul
+import operator
+from operator import itemgetter
 
 import re
 
