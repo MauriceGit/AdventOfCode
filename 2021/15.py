@@ -25,30 +25,27 @@ def create_field(lines, repeat=1):
     return field, w, h
 
 
-def create_graph_from_field(field, w, h):
-    graph = nx.DiGraph()
-    for y in range(h):
-        for x in range(w):
-            pos = (x,y)
-            for d in dir_list_4():
-                new_pos = add(pos, d)
-                graph.add_edge(pos, new_pos, weight=field[new_pos])
-                graph.add_edge(new_pos, pos, weight=field[pos])
-    return graph
+def get_neighbors(state, p):
+    return [add(p, d) for d in dir_list_4()]
 
 
-def calc_best_path(lines, repeat=1):
-    field, w, h = create_field(lines, repeat=repeat)
-    graph = create_graph_from_field(field, w, h)
-    return nx.shortest_path_length(graph, (0,0), (w-1,h-1), weight='weight')
+def edge_cost(state, p, p2):
+    if p2 not in state:
+        return 1000
+    return state[p2]
 
 
 def main():
 
     lines = open_data("15.data")
 
-    print(calc_best_path(lines))
-    print(calc_best_path(lines, repeat=5))
+    field1, w1, h1 = create_field(lines, repeat=1)
+    field2, w2, h2 = create_field(lines, repeat=5)
+
+    _, dist1, _ = dijkstra((0,0), get_neighbors, state=field1, end_pos=(w1-1,h1-1), edge_cost=edge_cost)
+    _, dist2, _ = dijkstra((0,0), get_neighbors, state=field2, end_pos=(w2-1,h2-1), edge_cost=edge_cost)
+    print(dist1)
+    print(dist2)
 
 
 if __name__ == "__main__":

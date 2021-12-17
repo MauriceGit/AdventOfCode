@@ -23,6 +23,12 @@ from fractions import gcd
 from recordtype import recordtype
 # example: Planet = recordtype("Planet", "p v")
 
+from heapq import heapify, heappop, heappush
+# queue = [(dist, pos, ...)]
+# heapify(queue)
+# dist, pos = heappop(queue)
+# heappush(queue, (dist, new_pos))
+
 import math
 from math import sin, cos, ceil
 # example: math.ceil()
@@ -150,6 +156,41 @@ def add_surrounding_edge(graph, p):
     add_edge(graph, p, (-1,0))
     add_edge(graph, p, (0, 1))
     add_edge(graph, p, (0,-1))
+
+
+# get_neighbors:    Function with state and current_pos as parameters: get_neighbors(state, pos)
+# state:            Most likely just the field that contains the graph. Could also be a tuple that contains more information!
+# edge_cost:        Function with state, current_pos and next_pos as parameters: edge_cost(state, pos, next_pos)
+# visit:            Function that gets called for every single node that gets reached (with minimum distance).
+#                   It expects state, pos, dist and path as parameters: visit(state, pos, dist, path)
+# use_path:         True, if you need the actual shortest path from start to end. Will impact runtime!
+#                   Otherwise, the returned path will always be []
+def dijkstra(start_pos, get_neighbors, state=None, edge_cost=None, end_pos=None, visit=None, use_path=False):
+
+    visited = set()
+    queue = [(0, start_pos, [start_pos] if use_path else [])]
+    heapify(queue)
+
+    while len(queue) > 0:
+        dist, pos, path = heappop(queue)
+
+        if pos in visited:
+            continue
+
+        visited.add(pos)
+
+        if visit is not None and not visit(state, pos, dist, path):
+            return pos, dist, path
+
+        if end_pos is not None and pos == end_pos:
+            return pos, dist, path
+
+        for new_pos in get_neighbors(state, pos):
+            cost = 1 if edge_cost is None else edge_cost(state, pos, new_pos)
+            new_path = [] if not use_path else path + [new_pos]
+            heappush(queue, (dist+cost, new_pos, new_path))
+
+    return None, None, None
 
 ############################### Other
 
