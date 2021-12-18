@@ -3,6 +3,7 @@
 import sys
 sys.path.append('../General')
 from utility import *
+import json
 
 
 def should_explode(n, level):
@@ -83,7 +84,7 @@ def magnitude(number):
 
 def main():
 
-    lines = lmap(eval, open_data("18.data"))
+    lines = lmap(json.loads, open_data("18.data"))
 
     print(magnitude(reduce(add_snailfish_numbers, lines)))
 
