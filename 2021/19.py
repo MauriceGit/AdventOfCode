@@ -197,29 +197,56 @@ def main():
     transformed_beacons = dict()
 
     for i, s in enumerate(sensors[1:]):
+        #print(s)
         points = set(s)
         transform_path = list(reversed(bfs(transform_dirs, i+1)))
+
+        print(transform_path)
 
         for index in range(len(transform_path)-1):
             a = transform_path[index]
             b = transform_path[index+1]
 
-            center, transform = transforms[a, b]
+            center, transform = transforms[(a, b)]
 
             #center = apply_transformation(transform, center)
 
 
-            points = {apply_transformation(transform, p) for p in points}
+            #points = {sub(p, center) for p in points}
+            #points = {apply_transformation(transform, p) for p in points}
+            #points = {add(p, center) for p in points}
+
+            #print(s[0])
+            #print(sub(s[0], center))
+            ##print(sub(center, s[0]))
+            ##print(add(center, s[0]))
+            #
+            #print(add(apply_transformation(transform, s[0]), center))
+            #print(apply_transformation(transform, sub(s[0], center)))
+            #return
+
+            points = {add(apply_transformation(transform, p), center) for p in points}
 
 
+
+
+        #print(points)
+
+        #for p in sorted(points):
+        #    print(p)
+
+        #break
 
 
 
         transformed_beacons[i+1] = points
-        all_beacons_in_sensor_0_coords |= points
+        all_beacons_in_sensor_0_coords = all_beacons_in_sensor_0_coords.union(points)
 
 
-    for b in sorted(transformed_beacons[1]):
+    #for b in sorted(transformed_beacons[1]):
+    #    print(b)
+
+    for b in sorted(all_beacons_in_sensor_0_coords):
         print(b)
 
     print(len(all_beacons_in_sensor_0_coords))
