@@ -114,8 +114,11 @@ def rad_to_deg(a):
 def deg_to_rad(a):
     return a*math.pi/180
 
+def manhatten_length(p):
+    return sum(map(abs, p))
+
 def manhatten_dist(p1, p2):
-    return sum(map(abs, sub(p1, p2)))
+    return manhatten_length(sub(p1, p2))
 
 # Returns a dictionary of number/letter -> direction vector. For reading direction strings directly.
 def direction_map(direction=None):
