@@ -19,6 +19,7 @@ def rotate3d_z(v, count=1):
         return v
     return rotate3d_z((-v[1], v[0], v[2]), count-1)
 
+
 @lru_cache(maxsize=10)
 def unique_transformations():
     transforms = set()
@@ -79,7 +80,7 @@ def main():
             sensors[-1].append(tuple(ints(beacon)))
 
     centers = []
-    all_points = sensors[0]
+    all_points = set(sensors[0])
     unused_sensors = sensors[1:]
     while len(unused_sensors) > 0:
 
@@ -88,11 +89,11 @@ def main():
 
         if transform is not None:
             centers.append(center)
-            all_points.extend([sub(apply_transformation(transform, p), center) for p in points])
+            all_points |= {sub(apply_transformation(transform, p), center) for p in points}
         else:
             unused_sensors.append(points)
 
-    print(len(set(all_points)))
+    print(len(all_points))
     print(max(map(lambda x: manhatten_dist(x[0],x[1]), combinations(centers, 2))))
 
 
