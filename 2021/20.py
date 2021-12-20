@@ -5,42 +5,21 @@ sys.path.append('../General')
 from utility import *
 
 
+def apply_algorithm(img, algorithm, roundzero=True):
 
+    output_image = defaultdict(lambda: "1" if roundzero else "0")
 
-def get_bin(img, x, y, default="0"):
-
-    n =  default if (x-1,y-1) not in img else img[(x-1,y-1)]
-    n += default if (x,  y-1) not in img else img[(x,y-1)]
-    n += default if (x+1,y-1) not in img else img[(x+1,y-1)]
-    n += default if (x-1,y  ) not in img else img[(x-1,y)]
-    n += default if (x,  y  ) not in img else img[(x,y)]
-    n += default if (x+1,y  ) not in img else img[(x+1,y)]
-    n += default if (x-1,y+1) not in img else img[(x-1,y+1)]
-    n += default if (x,  y+1) not in img else img[(x,y+1)]
-    n += default if (x+1,y+1) not in img else img[(x+1,y+1)]
-
-    return n
-
-
-def apply_algorithm(img, algorithm, n=0):
-
-    output_image = defaultdict(lambda: "0")
-
-    extend = 2 if n==0 else 5
-    minx = min(img.keys(), key=lambda x:x[0])[0]-extend
-    maxx = max(img.keys(), key=lambda x:x[0])[0]+extend
-    miny = min(img.keys(), key=lambda x:x[1])[1]-extend
-    maxy = max(img.keys(), key=lambda x:x[1])[1]+extend
+    minx = min(img.keys(), key=lambda x:x[0])[0]-1
+    maxx = max(img.keys(), key=lambda x:x[0])[0]+1+1
+    miny = min(img.keys(), key=lambda x:x[1])[1]-1
+    maxy = max(img.keys(), key=lambda x:x[1])[1]+1+1
 
     for y in range(miny, maxy):
         for x in range(minx, maxx):
-            n = get_bin(img, x, y, "0" if n == 0 else "1")
-            n = int(n, 2)
+            n = int(img[(x-1,y-1)]+img[(x,y-1)]+img[(x+1,y-1)]+img[(x-1,y)]+img[(x,y)]+img[(x+1,y)]+img[(x-1,y+1)]+img[(x,y+1)]+img[(x+1,y+1)], 2)
             output_image[(x,y)] = algorithm[n]
 
     return output_image
-
-
 
 
 def main():
@@ -49,25 +28,21 @@ def main():
 
     algorithm = groups[0][0].replace(".", "0").replace("#", "1")
 
-    lines = groups[1]
-
     image = defaultdict(lambda: "0")
-    for y,l in enumerate(lines):
+    for y,l in enumerate(groups[1]):
         for x,c in enumerate(l):
             image[(x,y)] = "0" if c == "." else "1"
 
-    for i in range(2):
-        image = apply_algorithm(image, algorithm)
+    for i in range(50):
+        image = apply_algorithm(image, algorithm, roundzero=i%2==0)
+        if i == 1:
+            print(sum(map(int, image.values())))
+    print(sum(map(int, image.values())))
 
-    print(len(lfilter(lambda x: x == "1", image.values())))
-
-
-    # ? 5985 with extend == 2
-    # ? 5538 with extend == 1
 
 if __name__ == "__main__":
     main()
 
 # year 2021
-# solution for 20.01: ?
-# solution for 20.02: ?
+# solution for 20.01: 5647
+# solution for 20.02: 15653
