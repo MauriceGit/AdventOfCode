@@ -33,7 +33,7 @@ import math
 from math import sin, cos, ceil
 # example: math.ceil()
 
-from itertools import repeat, chain, islice, accumulate, permutations, combinations, count
+from itertools import repeat, chain, islice, accumulate, permutations, combinations, count, product
 # examples:
 #
 # accumulate([1,2,3,4,5]) --> 1 3 6 10 15
