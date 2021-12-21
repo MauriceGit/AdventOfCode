@@ -9,8 +9,7 @@ from utility import *
 def possible_dice_rolls():
     # possible dice rolls (generates 27 universes overall!)
     # calculates the point values! Some occur multiple times for the three rolls!
-    dice_points = Counter(list(map(sum, product([1,2,3], repeat=3))))
-    return dice_points
+    return Counter(list(map(sum, product([1,2,3], repeat=3))))
 
 
 def one_move(players, player, scores, game_states):
