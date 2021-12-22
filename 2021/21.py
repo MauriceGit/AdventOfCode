@@ -63,11 +63,10 @@ def main():
 
     lines = open_data("21.data")
 
-    scores = [0,0]
     players = [int(ints(lines[0])[1]), int(ints(lines[1])[1])]
 
-    print(play(players.copy(), scores.copy()))
-    print(max(one_move(players.copy(), 0, scores.copy(), dict())))
+    print(play(players.copy(), [0,0]))
+    print(max(one_move(players.copy(), 0, [0,0], dict())))
 
 
 if __name__ == "__main__":
