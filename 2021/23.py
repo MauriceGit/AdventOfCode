@@ -38,6 +38,14 @@ def all_steps_unoccupied(occupied, amph_type, p0, p1):
     return True
 
 
+def anything_clear_below(final_positions, occupied, p1):
+
+    for p in final_positions:
+        if p[1] > p1[1] and occupied[p] == "":
+            return True
+    return False
+
+
 def path_clear(occupied, final_pos, amph_type, p0, p1):
 
     if p0 in final_pos[amph_type]:
@@ -59,8 +67,12 @@ def path_clear(occupied, final_pos, amph_type, p0, p1):
         return False
 
     # hallway to room
-    if p1[1] == 1 and occupied[(p1[0],2)] == "":
-        # stops at first room pos but second one is empty as well!
+    #if p1[1] == 1 and occupied[(p1[0],2)] == "":
+    #    # stops at first room pos but second one is empty as well!
+    #    return False
+
+    # tries to stop at the upper-most position
+    if p1[1] > 0 and anything_clear_below(final_positions, occupied, p1):
         return False
 
     # room to hallway
@@ -93,58 +105,57 @@ def all_final(amphipods, final_pos):
     return True
 
 
-cache = dict()
+def make_move(occupied, amphipods, t, pfrom, pto):
+    occupied[pfrom] = ""
+    occupied[pto] = t
+    amphipods[t] = (amphipods[t] - set([pfrom])) | set([pto])
+    #amphipods[t].add(pto)
+    #amphipods[t].remove(pfrom)
 
-def move(total_energie, path, amphipods, occupied, final_pos, hallway, energie, steps, level=0):
 
-    # check, if we're done!
-    if all_final(amphipods, final_pos):
-        return total_energie, path
 
-    cache_key = (tuple(occupied.items()))
-    posses = amphipods.items()
-    posses = [(t, tuple(sorted(list(ps)))) for t, ps in posses]
-    cache_key = tuple(posses)
-    if cache_key in cache:
-        return cache[cache_key]
+def state(occ, amphs):
+    return tuple(occ.items())
+
+
+def move(total_energie, path, _amphipods, _occupied, final_pos, hallway, energie, steps, level=0):
+
 
     # make a list of all possible moves room --> hallway and hallway --> final_room.
-    queue = get_all_moves(amphipods, occupied, final_pos, hallway, energie, steps)
-    #all_moves.sort()
+    moves = get_all_moves(_amphipods, _occupied, final_pos, hallway, energie, steps)
 
-    #print(len(all_moves), level, total_energie)
+    # [(used_energie, move, path)]
+    queue = [(0, move, []) for move in moves]
+    heapify(queue)
 
-    #pp(occupied, final_pos, hallway)
+    visited = set()
 
-    energies = []
+    while len(queue) > 0:
 
-    for m in queue:
-        #print("try:", m)
+        occ = _occupied.copy()
+        amphs = _amphipods.copy()
 
-        e, t, pfrom, pto = m
+        used_energie, move, path = heappop(queue)
+        #e, t, pfrom, pto = move
 
-        tmp_occ = occupied.copy()
-        tmp_occ[pfrom] = ""
-        tmp_occ[pto] = t
+        for m in path:
+            make_move(occ, amphs, m[1], m[2], m[3])
 
-        tmp_amphs = amphipods.copy()
-        tmp_amphs[t] = (tmp_amphs[t] - set([pfrom])) | set([pto])
+        # check, if we're done!
+        if all_final(amphs, final_pos):
+            return used_energie, path
 
-        tmp_energie, tmp_path = move(total_energie + e, path + [m], tmp_amphs, tmp_occ, final_pos, hallway, energie, steps, level=level+1)
+        s = state(occ, amphs)
+        if s in visited:
+            continue
+        visited.add(s)
 
-        #if level == 0:
-        #    print(tmp_energie)
+        new_moves = get_all_moves(amphs, occ, final_pos, hallway, energie, steps)
+        for m in new_moves:
+            heappush(queue, (used_energie+m[0], m, path + [m]))
 
-        energies.append((tmp_energie, tmp_path))
 
-    if len(energies) == 0:
-        return 1000000000, []
-
-    res = min(energies, key=lambda x: x[0])
-
-    cache[cache_key] = res
-
-    return res
+    return 100000000, []
 
 
 
@@ -154,7 +165,7 @@ def pp(occupied, final_pos, hallway):
     field = dict()
 
     for x in range(-1, 12):
-        for y in range(-1, 4):
+        for y in range(-1, 6):
             field[(x,y)] = "#"
 
     for x in range(10):
@@ -174,35 +185,55 @@ def pp(occupied, final_pos, hallway):
     draw(field, print_directly=True)
 
 
-def make_move(occupied, amphipods, t, pfrom, pto):
-    occupied[pfrom] = ""
-    occupied[pto] = t
-    amphipods[t] = (amphipods[t] - set([pfrom])) | set([pto])
 
 def main():
 
-    lines = open_data("23.data")
+    groups = open_data_groups("23.data")
 
+    # Part 1:
     #############
     #...........#
     ###B#A#B#C###
       #C#D#D#A#
       #########
 
+    # Part 2:
+    #############
+    #...........#
+    ###B#A#B#C###
+      #D#C#B#A#
+      #D#B#A#C#
+      #C#D#D#A#
+      #########
+
+
     # There are only exactly of two steps for each amphipod:
     #   pos --> hallway --> final_pos
 
 
+    lines = groups[0]
+
     hallway = [(0,0), (1,0), (3,0), (5,0), (7,0), (9,0), (10,0)]
-    amphipods = {"A": {(4,1), (8,2)}, "B": {(2,1), (6,1)}, "C": {(2,2), (8,1)}, "D": {(4,2), (6,2)}}
-    #amphipods = {"A": {(4,2)}, "B": {(2,2)}}
-    final_pos = {"A": [(2,2), (2,1)], "B": [(4,2), (4,1)], "C": [(6,2), (6,1)], "D": [(8,2), (8,1)]}
-    #final_pos = {"A": [(2,2), (2,1)], "B": [(4,2), (4,1)]}
-    # pos --> "A"
+    amphipods = defaultdict(set)
+
+    for y,l in enumerate(lines):
+        for x,c in enumerate(l):
+            if c in "ABCD":
+                amphipods[c].add((x-1, y-1))
+
+    final_pos = {
+        "A": [(2, y+1) for y in range(len(lines)-3)],
+        "B": [(4, y+1) for y in range(len(lines)-3)],
+        "C": [(6, y+1) for y in range(len(lines)-3)],
+        "D": [(8, y+1) for y in range(len(lines)-3)]
+    }
+
+
+
     occupied = defaultdict(lambda: "")
     energie = {"A": 1, "B": 10, "C": 100, "D": 1000}
 
-
+    #return
 
     for t, ps in amphipods.items():
         for p in ps:
@@ -218,10 +249,7 @@ def main():
                 steps[(p, hp)] = manhatten_dist(p, hp)
                 steps[(hp, p)] = manhatten_dist(p, hp)
 
-
-
     score, moves = move(0, [], amphipods, occupied, final_pos, hallway, energie, steps)
-
 
     for m in moves:
         e, t, pfrom, pto = m
@@ -234,5 +262,5 @@ if __name__ == "__main__":
     main()
 
 # year 2021
-# solution for 23.01: ?
+# solution for 23.01: 14510
 # solution for 23.02: ?
