@@ -4,44 +4,9 @@ import sys
 sys.path.append('../General')
 from utility import *
 
-Cube = recordtype("Cube", "x0 x1 y0 y1 z0 z1")
-
-
-
-def diff_cube_left(c0, c1):
-    return Cube(min(c0.x0, c1.x0), max(c0.x0, c1.x0)-1, min(c0.y0, c1.y0), max(c0.y0, c1.y0)-1, min(c0.z0, c1.z0), max(c0.z0, c1.z0)-1)
-def diff_cube_right(c0, c1):
-    return Cube(min(c0.x1, c1.x1)+1, max(c0.x1, c1.x1), min(c0.y1, c1.y1)+1, max(c0.y1, c1.y1), min(c0.z1, c1.z1)+1, max(c0.z1, c1.z1))
-
-def overlap_region(c0, c1):
-    return Cube(max(c0.x0, c1.x0), min(c0.x1, c1.x1), max(c0.y0, c1.y0), min(c0.y1, c1.y1), max(c0.z0, c1.z0), min(c0.z1, c1.z1))
-
-def other_overlaps(c0, c1):
-    return [
-        # OK! 1 in drawing
-        Cube(min(c0.x0, c1.x0), max(c0.x0, c1.x0)-1, max(c0.y0, c1.y0), min(c0.y1, c1.y1), max(c0.z0, c1.z0), min(c0.z1, c1.z1)),
-        # OK! 2 in drawing
-        Cube(min(c0.x1, c1.x1)+1, max(c0.x1, c1.x1), max(c0.y0, c1.y0), min(c0.y1, c1.y1), max(c0.z0, c1.z0), min(c0.z1, c1.z1)),
-
-        # OK! 3 in drawing
-        Cube(max(c0.x0, c1.x0), min(c0.x1, c1.x1), min(c0.y0, c1.y0), max(c0.y0, c1.y0)-1, max(c0.z0, c1.z0), min(c0.z1, c1.z1)),
-        # OK! 4 in drawing
-        Cube(max(c0.x0, c1.x0), min(c0.x1, c1.x1), min(c0.y1, c1.y1)+1, max(c0.y1, c1.y1), max(c0.z0, c1.z0), min(c0.z1, c1.z1)),
-
-        # OK! Not in drawing
-        Cube(max(c0.x0, c1.x0), min(c0.x1, c1.x1), max(c0.y0, c1.y0), min(c0.y1, c1.y1), min(c0.z0, c1.z0), max(c0.z0, c1.z0)-1),
-        Cube(max(c0.x0, c1.x0), min(c0.x1, c1.x1), max(c0.y0, c1.y0), min(c0.y1, c1.y1), min(c0.z1, c1.z1)+1, max(c0.z1, c1.z1))
-    ]
-
-
-
-
-
+Cube = recordtype("Cube", "x0 x1 y0 y1 z0 z1 children")
 
 def cubes_have_overlap(c0, c1):
-
-    #return volume(calc_center(c0, c1)) > 0
-
     b1 = c0.x1 < c1.x0 or c1.x1 < c0.x0
     b2 = c0.y1 < c1.y0 or c1.y1 < c0.y0
     b3 = c0.z1 < c1.z0 or c1.z1 < c0.z0
@@ -153,13 +118,13 @@ def overlaps(c0, c1):
     back   = append_cube(calc_back(c0, c1))
     center = calc_center(c0, c1)
 
-    print("bottom: {} -> {}".format(bottom, volume(bottom)))
-    print("top   : {} -> {}".format(top, volume(top)))
-    print("left  : {} -> {}".format(left, volume(left)))
-    print("right : {} -> {}".format(right, volume(right)))
-    print("front : {} -> {}".format(front, volume(front)))
-    print("back  : {} -> {}".format(back, volume(back)))
-    print("center: {} -> {}".format(center, volume(center)))
+    #print("bottom: {} -> {}".format(bottom, volume(bottom)))
+    #print("top   : {} -> {}".format(top, volume(top)))
+    #print("left  : {} -> {}".format(left, volume(left)))
+    #print("right : {} -> {}".format(right, volume(right)))
+    #print("front : {} -> {}".format(front, volume(front)))
+    #print("back  : {} -> {}".format(back, volume(back)))
+    #print("center: {} -> {}".format(center, volume(center)))
 
     #cs = [bottom, top, left, right, front, back]
 
@@ -169,126 +134,58 @@ def overlaps(c0, c1):
     return belong_to_c0, belong_to_c1, center
 
 
+# c0 is within c1
 def cube_within_cube(c0, c1):
     return c0.x0 >= c1.x0 and c0.x1 <= c1.x1 and c0.y0 >= c1.y0 and c0.y1 <= c1.y1 and c0.z0 >= c1.z0 and c0.z1 <= c1.z1
+
+
+def update_cubes(cubes, new_cube, on):
+
+
+
+
 
 def main():
 
     lines = open_data("22.data")
 
+    #grid = defaultdict(int)
+    #for l in lines:
+    #    x0,x1,y0,y1,z0,z1 = ints(l)
+    #    on = l.startswith("on")
+    #    if min(x0,y0,z0) >= -50 and max(x1,y1,z1) <= 50:
+    #        for x in range(x0,x1+1):
+    #            for y in range(y0,y1+1):
+    #                for z in range(z0,z1+1):
+    #                    grid[(x,y,z)] = int(on)
+    #
+    #print(len(lfilter(lambda x: x==1, grid.values())))
 
-    grid = defaultdict(int)
-    for l in lines:
+
+    # cubes is a list of main ON cubes. Nothing here is an already subdivided cube.
+    # Now, we add new cubes from lines
+    #   Go through all cubes and check if an overlaps exist:
+    #       If we have and overlap, recursively go down the children. For each child, check overlap again and recurse.
+    #       All children that overlap, need to be handled!
+    #       If we add an ON cube that overlaps:
+    #           Calculate all sub-cubes for c0, c1 and the center region
+    #           c0 will be left exactly as it was!
+    #           c1 is added to the list of cubes
+    #           c1 has all the sub-cubes we calculated as children. The center region is ignored and not added!
+    #       If we add an OFF cube that overlaps:
+    #           If a cube is within the OFF-cube, remove the cube
+    #           Otherwise calculate all sub-cubes for c0, c1 and center region
+    #           All sub-cubes in c0 are added as children for the current cube (no children yet!)
+    #
+
+
+    cubes = [lines[0]]
+    for l in lines[1:2]:
         x0,x1,y0,y1,z0,z1 = ints(l)
         on = l.startswith("on")
-        if min(x0,y0,z0) >= -50 and max(x1,y1,z1) <= 50:
-            for x in range(x0,x1+1):
-                for y in range(y0,y1+1):
-                    for z in range(z0,z1+1):
-                        grid[(x,y,z)] = int(on)
+        cube = Cube(x0,x1,y0,y1,z0,z1, [])
 
-    print(len(lfilter(lambda x: x==1, grid.values())))
-
-
-
-    c0 = Cube(x0=10, x1=12, y0=10, y1=10, z0=10, z1=12)
-    c1 = Cube(x0=9, x1=11, y0=9, y1=11, z0=9, z1=11)
-    print("Intersect current cube: {} with new cube {}".format(c0, c1))
-    only_c0, only_c1, center = overlaps(c0, c1)
-
-
-    print("Belonging to c0:")
-    for c in only_c0:
-        print(c, volume(c))
-    #print("Belonging to c1:")
-    #for c in only_c1:
-    #    print(c, volume(c))
-    print("Center:")
-    print(center, volume(center))
-
-    print("difference in volume: {}".format(volume(center)))
-
-    print("sanity check: {} == {}".format(volume(c0), volumes(only_c0)+volume(center)))
-
-
-    #return
-
-
-    cubes = []
-    for l in lines[:2]:
-        x0,x1,y0,y1,z0,z1 = ints(l)
-        on = l.startswith("on")
-        cube = Cube(x0,x1,y0,y1,z0,z1)
-        has_overlapped = False
-
-        print("=========================================================")
-        print("Add new cube: {} --> {}".format(cube, "ON" if on else "OFF"))
-
-        for c in cubes:
-            print(c)
-
-
-        new_cubes = []
-        remove_cubes = []
-        for i in range(len(cubes)):
-
-            current_cube = cubes[i]
-            if cubes_have_overlap(current_cube, cube):
-
-
-                if cube_within_cube(current_cube, cube):
-                    if on:
-                        cubes[i] = cube
-                    remove_cubes.append(i)
-                    continue
-                if on and cube_within_cube(cube, current_cube):
-                    continue
-
-                remove_cubes.append(i)
-
-                print("Intersect current cube: {} with new cube {}".format(current_cube, cube))
-
-                only_c0, only_c1, center = overlaps(current_cube, cube)
-
-
-
-                print("Belonging to c0:")
-                for c in only_c0:
-                    print(c, volume(c))
-                #print("Belonging to c1:")
-                #for c in only_c1:
-                #    print(c, volume(c))
-                print("Center:")
-                print(center, volume(center))
-
-                print("difference in volume: {}".format(volume(center)))
-
-                print("sanity check: {} == {}".format(volume(current_cube), volumes(only_c0)+volume(center)))
-
-                #cubes.extend(only_c0)
-                new_cubes.extend(only_c0)
-
-                # c should always be on!
-                if on:
-                    #cubes.extend(only_c1)
-                    #cubes.append(center)
-                    new_cubes.extend(only_c1)
-                    new_cubes.append(center)
-
-                has_overlapped = True
-
-        #for c in remove_cubes:
-        #    del cubes[cubes.index(c)]
-
-        for i in sorted(remove_cubes, reverse=True):
-            del cubes[i]
-        cubes.extend(new_cubes)
-
-        if not has_overlapped:
-            cubes.append(cube)
-
-        print("\nAfter this round, there are: {} cubes turned on!\n".format(sum(map(volume, cubes))))
-
+        cubes = update_cubes(cubes, cube, on)
 
 
     print("final cubes: ")
