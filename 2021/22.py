@@ -30,7 +30,6 @@ def calc_bottom(c0, c1):
         return Cube(c0.x0, c0.x1, c0.y0, c1.y0-1, c0.z0, c0.z1, [])
     elif c1.y0 < c0.y0:
         return calc_bottom(c1, c0)
-
     return None
 
 
@@ -84,12 +83,12 @@ def calc_right(c0, c1):
 
 def overlaps(c0, c1):
     cs = [
-        calc_bottom(c0, c1),     # bottom
-        calc_top(c0, c1),        # top
-        calc_left(c0, c1),       # left
-        calc_right(c0, c1),      # right
-        calc_front(c0, c1),      # front
-        calc_back(c0, c1)       # back
+        calc_bottom(c0, c1), # bottom
+        calc_top(c0, c1),    # top
+        calc_left(c0, c1),   # left
+        calc_right(c0, c1),  # right
+        calc_front(c0, c1),  # front
+        calc_back(c0, c1)    # back
     ]
     return lfilter(lambda x: x is not None and cubes_have_overlap(x, c0), cs)
 
