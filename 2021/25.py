@@ -15,7 +15,6 @@ def step(field, w, h):
             new_pos = ((x+1)%w, y)
             if field[new_pos] == ".":
                 f1[new_pos] = ">"
-                #field[(x,y)] = "."
                 done = False
             else:
                 f1[(x,y)] = ">"
@@ -35,42 +34,27 @@ def step(field, w, h):
 
     return f2, done
 
+
 def main():
 
     lines = open_data("25.data")
 
-    # 0 == nothing, 1 == down, 2 == right
     field = defaultdict(lambda: ".")
     for y, l in enumerate(lines):
         for x,c in enumerate(l):
             field[(x,y)] = c
     w, h = len(lines[0]), len(lines)
 
-    #draw(field, symbols={-1:".", ".":".", "v":"v", ">":">"})
-
-
     for i in itertools.count():
-    #for i in range(10):
         field, done = step(field.copy(), w, h)
-        #print("Step {}:".format(i+1))
-        #draw(field, symbols={-1:".", ".":".", "v":"v", ">":">"})
-        #break
-
-        #if i == 3:
-        #    draw(field, symbols={-1:".", ".":".", "v":"v", ">":">"})
-
         if done:
             print(i+1)
             break
-
-    #draw(field, symbols={-1:".", ".":".", "v":"v", ">":">"})
-
-
 
 
 if __name__ == "__main__":
     main()
 
 # year 2021
-# solution for 25.01: ?
-# solution for 25.02: ?
+# solution for 25.01: 582
+# solution for 25.02: *
