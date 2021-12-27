@@ -33,6 +33,7 @@ import math
 from math import sin, cos, ceil
 # example: math.ceil()
 
+import itertools
 from itertools import repeat, chain, islice, accumulate, permutations, combinations, count, product
 # examples:
 #
@@ -51,7 +52,7 @@ from itertools import repeat, chain, islice, accumulate, permutations, combinati
 #
 # combinations('ABCD', 2) --> AB AC AD BC BD CD
 #
-# for i in itertools.count:
+# for i in itertools.count():
 #    unbounded for loop! With index assigned to i. Awesome!
 
 import networkx as nx
