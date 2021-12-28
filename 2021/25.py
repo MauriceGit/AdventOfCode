@@ -5,48 +5,32 @@ sys.path.append('../General')
 from utility import *
 
 
-def step(field, w, h):
-
-    f1 = defaultdict(lambda: ".")
-    done = True
-    # right
-    for (x,y) in list(field.keys()):
-        if field[(x,y)] == ">":
-            new_pos = ((x+1)%w, y)
-            if field[new_pos] == ".":
-                f1[new_pos] = ">"
-                done = False
-            else:
-                f1[(x,y)] = ">"
-
-    f2 = defaultdict(lambda: ".")
-    # down
-    for (x,y) in list(field.keys()):
-        if field[(x,y)] == "v":
-            new_pos = (x, (y+1)%h)
-            if f1[new_pos] == "." and field[new_pos] != "v":
-                f2[(x, (y+1)%h)] = "v"
-                done = False
-            else:
-                f2[(x, y)] = "v"
-        elif f1[(x,y)] == ">":
-            f2[(x,y)] = ">"
-
-    return f2, done
+def step(right, down, w, h):
+    new_right = right.copy()
+    for (x,y) in right:
+        new_pos = ((x+1)%w, y)
+        if new_pos not in right and new_pos not in down:
+            new_right.add(new_pos)
+            new_right.remove((x,y))
+    new_down = down.copy()
+    for (x,y) in down:
+        new_pos = (x, (y+1)%h)
+        if new_pos not in new_right and new_pos not in down:
+            new_down.add(new_pos)
+            new_down.remove((x,y))
+    return new_right, new_down, new_right == right and new_down == down
 
 
 def main():
 
     lines = open_data("25.data")
 
-    field = defaultdict(lambda: ".")
-    for y, l in enumerate(lines):
-        for x,c in enumerate(l):
-            field[(x,y)] = c
+    right = {(x,y) for y,l in enumerate(lines) for x,c in enumerate(l) if c == ">"}
+    down  = {(x,y) for y,l in enumerate(lines) for x,c in enumerate(l) if c == "v"}
     w, h = len(lines[0]), len(lines)
 
     for i in itertools.count():
-        field, done = step(field.copy(), w, h)
+        right, down, done = step(right, down, w, h)
         if done:
             print(i+1)
             break
