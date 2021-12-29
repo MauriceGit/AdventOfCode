@@ -142,7 +142,6 @@ def test(number):
     return None if z != 0 else number
 
 
-
 # Only takes half a second, don't worry ;)
 def try_combination(possible_numbers):
 
@@ -162,9 +161,9 @@ def try_combination(possible_numbers):
 
 def main():
 
-    # interpret() was used to verify, that my simplifications were valid
     # pp() was used to transform the input to python code to make it easier to work with
-    # That code was then simplified manually (doesn't take long)
+    # The transformed code was then simplified manually
+    # interpret() was used to verify, that my simplifications were valid
 
     # Then: Half of the input numbers must match x when compared (eql), so that x == 0 afterwards.
     # That is needed, so that z stays as small as possible and doesn't explode!
@@ -172,6 +171,10 @@ def main():
 
     # If at any place, we get comparisons outside our range, the number is invalid and we return early.
     # Otherwise we just try the remaining values from top or bottom depending on part1 or part2.
+
+    # The first result (part 1) was determined completely manually by going through some numbers with
+    # the first ones having a higher priority. It took about 10 minutes to get the correct result.
+    # Afterwards I automated that process for part 2. It computes both parts in ~1.3s now.
 
     lines = open_data("24.data")
 
