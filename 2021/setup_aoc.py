@@ -1,1 +1,0 @@
-/home/yeti/Projects/AdventOfCode/General/setup_aoc.py
