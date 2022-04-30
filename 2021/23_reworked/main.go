@@ -224,7 +224,7 @@ func calcNextSteps(s RoomState) int {
 	return nextStepsCount
 }
 
-func aStar(state RoomState) int {
+func dijkstra(state RoomState) int {
 	priorityQueue := &PriorityQueue{}
 	heap.Init(priorityQueue)
 
@@ -253,13 +253,6 @@ func aStar(state RoomState) int {
 	}
 
 	return 0
-}
-
-func elapsed() func() {
-	start := time.Now()
-	return func() {
-		fmt.Printf("Runtime: %v\n", time.Since(start))
-	}
 }
 
 func parseRoomsString(s string) (res [16]byte) {
@@ -299,7 +292,7 @@ func main() {
 		gRoomsArrayLength = part.roomsArrayLength
 
 		start := time.Now()
-		score := aStar(RoomState{0, part.hall, part.rooms})
+		score := dijkstra(RoomState{0, part.hall, part.rooms})
 		timings[i] = time.Since(start).Milliseconds()
 
 		fmt.Printf("Part %v: %v in %vms\n", i+1, score, timings[i])
