@@ -9,25 +9,25 @@ import (
 )
 
 const (
-	HALL_LENGTH      = 11
-	A           byte = 0
-	B           byte = 1
-	C           byte = 2
-	D           byte = 3
-	EMPTY       byte = 4
-	X           byte = 5
+	A             byte  = 0
+	B             byte  = 1
+	C             byte  = 2
+	D             byte  = 3
+	EMPTY         byte  = 4
+	X             byte  = 5
+	HALL_LENGTH         = 11
+	LONGEMPTY     int64 = int64(EMPTY)<<6 | int64(EMPTY)<<3 | int64(EMPTY)
+	IMPORTANTBITS int64 = 511
 )
 
 var gFinalRooms int64
 var gRoomHeight int
 var gRoomsArrayLength int
-var gRoomX = []int{2, 4, 6, 8}
 
 // 4*7 is the theoretical maximum of next possible steps.
 // That is: All the 7 hall places are empty and each of the 4 rooms tries all different hall placements.
 var gNextSteps [28]RoomState
-
-var gStepCost = map[byte]int{A: 1, B: 10, C: 100, D: 1000}
+var gStepCost = [...]int{1, 10, 100, 1000}
 var gMapping = map[byte]byte{'a': A, 'b': B, 'c': C, 'd': D, ' ': EMPTY, 'x': X}
 
 type RoomState struct {
@@ -70,7 +70,6 @@ func (s *PriorityQueue) Pop() any {
 	return x
 }
 
-//func isInFinalPosition(c byte, col, yPos int, rooms [16]byte) bool {
 func isInFinalPosition(c byte, col, yPos int, rooms int64) bool {
 	// c already represents its final column.
 	if int(c) != col {
@@ -86,13 +85,10 @@ func isInFinalPosition(c byte, col, yPos int, rooms int64) bool {
 	return true
 }
 
+// Checks, if all the places upwards from yPos within one room are equal to EMPTY.
 func canMoveUp(col, yPos int, rooms int64) bool {
-	for p := 0; p < yPos; p++ {
-		if getAt(rooms, col*gRoomHeight+p) != EMPTY {
-			return false
-		}
-	}
-	return true
+	i := rooms >> ((col * gRoomHeight) * 3)
+	return i&(IMPORTANTBITS>>((3-yPos)*3)) == LONGEMPTY>>((3-yPos)*3)
 }
 
 func emptyAt(i int64, pos int) int64 {
@@ -128,6 +124,7 @@ func checkHallUntil(start, end, incr int, hall int64) bool {
 			return false
 		}
 	}
+
 	return true
 }
 
@@ -326,5 +323,4 @@ func main() {
 	}
 
 	fmt.Printf("Total runtime: %vms\n", timings[0]+timings[1])
-
 }
