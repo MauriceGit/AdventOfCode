@@ -28,20 +28,18 @@ var gRoomX = []int{2, 4, 6, 8}
 var gNextSteps [28]RoomState
 
 var gStepCost = map[byte]int{A: 1, B: 10, C: 100, D: 1000}
-var gMapping = map[byte]byte{'a': A, 'b': B, 'c': C, 'd': D, 'x': X, ' ': EMPTY}
+var gMapping = map[byte]byte{'a': A, 'b': B, 'c': C, 'd': D, ' ': EMPTY, 'x': X}
 
 type RoomState struct {
 	cost int
-	// 3 bit per entry. 0 == empty, 1..4 == a..d, 5 == x
+	// 3 bit per entry. 0..3 == a..d, 4==empty, 5 == x. Corresponding to the final column!
 	// 11 places == 33bit --> 46bit int
-	//hall int64
-	hall  [HALL_LENGTH]byte
+	hall  int64
 	rooms [16]byte
 }
 
 type VisitedKey struct {
-	//hall int64
-	hall  [HALL_LENGTH]byte
+	hall  int64
 	rooms [16]byte
 }
 
@@ -94,11 +92,22 @@ func canMoveUp(col, yPos int, rooms [16]byte) bool {
 	return true
 }
 
-func setHallAt(h int64, pos int, c byte) int64 {
-	return h | (int64(c) << (pos * 3))
-}
 func emptyHallAt(h int64, pos int) int64 {
-	return h & ^(7 << (pos * 3))
+	return h & ^(7 << ((HALL_LENGTH - 1 - pos) * 3))
+}
+func setHallAt(h int64, pos int, c byte) int64 {
+	return emptyHallAt(h, pos) | (int64(c) << ((HALL_LENGTH - 1 - pos) * 3))
+}
+func getHallAt(h int64, pos int) byte {
+	return byte((h >> ((HALL_LENGTH - 1 - pos) * 3)) & 7)
+}
+
+func validateHall(h int64) {
+	for i := 0; i < HALL_LENGTH; i++ {
+		if getHallAt(h, i) > X {
+			panic("Value too large in hall")
+		}
+	}
 }
 
 func moveRoomToHall(rPos, hPos, roomSteps, hallSteps int, c byte, s RoomState) RoomState {
@@ -106,8 +115,7 @@ func moveRoomToHall(rPos, hPos, roomSteps, hallSteps int, c byte, s RoomState) R
 
 	tmpS := s
 	tmpS.rooms[rPos] = EMPTY
-	tmpS.hall[hPos] = c
-	//tmpS.hall = setHallAt(tmpS.hall, hPos, c)
+	tmpS.hall = setHallAt(tmpS.hall, hPos, c)
 	tmpS.cost += cost
 
 	return tmpS
@@ -117,8 +125,7 @@ func moveHallToRoom(hPos, rPos, roomSteps, hallSteps int, c byte, s RoomState) R
 	cost := (hallSteps + roomSteps + 1) * gStepCost[c]
 
 	tmpS := s
-	tmpS.hall[hPos] = EMPTY
-	//tmpS.hall = emptyHallAt(tmpS.hall, hPos)
+	tmpS.hall = setHallAt(tmpS.hall, hPos, EMPTY)
 	tmpS.rooms[rPos] = c
 	tmpS.cost += cost
 
@@ -127,10 +134,11 @@ func moveHallToRoom(hPos, rPos, roomSteps, hallSteps int, c byte, s RoomState) R
 
 // Does not check the start position and does not check the end position!
 // Both are OK, as you can't stand above a room and it should not check the start position anyway!
-func checkHallUntil(start, end, incr int, hall [HALL_LENGTH]byte) bool {
+//func checkHallUntil(start, end, incr int, hall [HALL_LENGTH]byte) bool {
+func checkHallUntil(start, end, incr int, hall int64) bool {
 	// Check, if the hall is empty until dstHallPos
-	for p := start + incr; p != end; p += incr {
-		h := hall[p]
+	for p := start + incr; p != end && p < HALL_LENGTH; p += incr {
+		h := getHallAt(hall, p)
 		if h == X {
 			continue
 		}
@@ -144,6 +152,7 @@ func checkHallUntil(start, end, incr int, hall [HALL_LENGTH]byte) bool {
 func roomPlacementPossible(col int, c byte, rooms [16]byte) (int, bool) {
 
 	lastIndex := 0
+
 	for i := 0; i < gRoomHeight; i++ {
 		p := byte(rooms[col*gRoomHeight+i])
 
@@ -189,7 +198,7 @@ func calcNextSteps(s RoomState) int {
 		// Check open positions to the left and break if one is not empty
 		for p := hallCol - 1; p >= 0; p-- {
 
-			h := s.hall[p]
+			h := getHallAt(s.hall, p)
 			if h == X {
 				continue
 			}
@@ -201,7 +210,7 @@ func calcNextSteps(s RoomState) int {
 		}
 		// Check open positions to the right and break if one is not empty
 		for p := hallCol + 1; p < HALL_LENGTH; p++ {
-			h := s.hall[p]
+			h := getHallAt(s.hall, p)
 			if h == X {
 				continue
 			}
@@ -214,7 +223,9 @@ func calcNextSteps(s RoomState) int {
 	}
 
 	// Move from hall to destination room!
-	for i, c := range s.hall {
+	for i := 0; i < HALL_LENGTH; i++ {
+		c := getHallAt(s.hall, i)
+
 		if c == EMPTY || c == X {
 			continue
 		}
@@ -270,6 +281,7 @@ func dijkstra(state RoomState) int {
 		}
 	}
 
+	fmt.Println("Never found a valid solution...")
 	return 0
 }
 
@@ -279,11 +291,22 @@ func parseRoomsString(s string) (res [16]byte) {
 	}
 	return
 }
-func parseHallString(s string) (res [HALL_LENGTH]byte) {
+
+//func parseHallString(s string) (res [HALL_LENGTH]byte) {
+func parseHallString(s string) (res int64) {
 	for i, c := range s {
-		res[i] = gMapping[byte(c)]
+		//res[i] = gMapping[byte(c)]
+		res = setHallAt(res, i, gMapping[byte(c)])
 	}
 	return
+}
+
+func ppHall(h int64) {
+	fmt.Printf("Hall: [")
+	for i := 0; i < HALL_LENGTH; i++ {
+		fmt.Printf("%d ", getHallAt(h, i))
+	}
+	fmt.Printf("]\n")
 }
 
 func main() {
@@ -305,11 +328,12 @@ func main() {
 	}
 
 	emptyHall := parseHallString("  x x x x  ")
+	ppHall(emptyHall)
 	parts := []struct {
 		finalRoom        [16]byte
 		roomHeight       int
 		roomsArrayLength int
-		hall             [HALL_LENGTH]byte
+		hall             int64
 		rooms            [16]byte
 	}{
 		{parseRoomsString("aabbccdd"), 2, 8, emptyHall, parseRoomsString("bcadbdca")},
@@ -328,6 +352,7 @@ func main() {
 		timings[i] = time.Since(start).Milliseconds()
 
 		fmt.Printf("Part %v: %v in %vms\n", i+1, score, timings[i])
+
 	}
 
 	fmt.Printf("Total runtime: %vms\n", timings[0]+timings[1])
