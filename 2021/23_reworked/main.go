@@ -105,34 +105,14 @@ func getAt(i int64, pos int) byte {
 	return byte((i >> (pos * 3)) & 7)
 }
 
-func validateHall(h int64) {
-	for i := 0; i < HALL_LENGTH; i++ {
-		if getAt(h, i) > X {
-			panic("Value too large in hall")
-		}
-	}
-}
-
 func moveRoomToHall(rPos, hPos, roomSteps, hallSteps int, c byte, s RoomState) RoomState {
 	cost := (hallSteps + roomSteps + 1) * gStepCost[c]
-
-	tmpS := s
-	tmpS.rooms = setAt(tmpS.rooms, rPos, EMPTY)
-	tmpS.hall = setAt(tmpS.hall, hPos, c)
-	tmpS.cost += cost
-
-	return tmpS
+	return RoomState{s.cost + cost, setAt(s.hall, hPos, c), setAt(s.rooms, rPos, EMPTY)}
 }
 
 func moveHallToRoom(hPos, rPos, roomSteps, hallSteps int, c byte, s RoomState) RoomState {
 	cost := (hallSteps + roomSteps + 1) * gStepCost[c]
-
-	tmpS := s
-	tmpS.hall = setAt(tmpS.hall, hPos, EMPTY)
-	tmpS.rooms = setAt(tmpS.rooms, rPos, c)
-	tmpS.cost += cost
-
-	return tmpS
+	return RoomState{s.cost + cost, setAt(s.hall, hPos, EMPTY), setAt(s.rooms, rPos, c)}
 }
 
 // Does not check the start position and does not check the end position!
@@ -173,6 +153,38 @@ func roomPlacementPossible(col int, c byte, rooms int64) (int, bool) {
 func calcNextSteps(s RoomState) int {
 
 	nextStepsCount := 0
+
+	// Move from hall to destination room!
+	for i := 0; i < HALL_LENGTH; i++ {
+		c := getAt(s.hall, i)
+
+		if c == EMPTY || c == X {
+			continue
+		}
+
+		dstCol := int(c)
+		dstHallPos := dstCol*2 + 2
+
+		hallDir := dstHallPos - i
+		if hallDir > 0 {
+			hallDir = 1
+		} else {
+			hallDir = -1
+		}
+
+		// Check, if the hall is empty until dstHallPos
+		if checkHallUntil(i, dstHallPos, hallDir, s.hall) {
+
+			// Check, if there are only correct things in the final room!
+			if index, ok := roomPlacementPossible(dstCol, c, s.rooms); ok {
+				gNextSteps[0] = moveHallToRoom(i, dstCol*gRoomHeight+index, index, (dstHallPos-i)*hallDir, c, s)
+
+				// We can immediately stop right here, as this is _always_ a perfect move!
+				// So we trim the search tree and consider all other moves after this one!
+				return 1
+			}
+		}
+	}
 
 	// Move from room to hall
 	for i := 0; i < gRoomsArrayLength; i++ {
@@ -226,35 +238,6 @@ func calcNextSteps(s RoomState) int {
 		}
 	}
 
-	// Move from hall to destination room!
-	for i := 0; i < HALL_LENGTH; i++ {
-		c := getAt(s.hall, i)
-
-		if c == EMPTY || c == X {
-			continue
-		}
-
-		dstCol := int(c)
-		dstHallPos := dstCol*2 + 2
-
-		hallDir := dstHallPos - i
-		if hallDir > 0 {
-			hallDir = 1
-		} else {
-			hallDir = -1
-		}
-
-		// Check, if the hall is empty until dstHallPos
-		if checkHallUntil(i, dstHallPos, hallDir, s.hall) {
-
-			// Check, if there are only correct things in the final room!
-			if index, ok := roomPlacementPossible(dstCol, c, s.rooms); ok {
-				gNextSteps[nextStepsCount] = moveHallToRoom(i, dstCol*gRoomHeight+index, index, (dstHallPos-i)*hallDir, c, s)
-				nextStepsCount++
-			}
-		}
-	}
-
 	return nextStepsCount
 }
 
@@ -286,7 +269,7 @@ func dijkstra(state RoomState) int {
 	}
 
 	fmt.Println("Never found a valid solution...")
-	return 0
+	return -1
 }
 
 func parseString(s string) (res int64) {
@@ -294,14 +277,6 @@ func parseString(s string) (res int64) {
 		res = setAt(res, i, gMapping[byte(c)])
 	}
 	return
-}
-
-func ppHall(h int64) {
-	fmt.Printf("Hall: [")
-	for i := 0; i < HALL_LENGTH; i++ {
-		fmt.Printf("%d ", getAt(h, i))
-	}
-	fmt.Printf("]\n")
 }
 
 func main() {
@@ -323,7 +298,7 @@ func main() {
 	}
 
 	emptyHall := parseString("  x x x x  ")
-	ppHall(emptyHall)
+
 	parts := []struct {
 		finalRoom        int64
 		roomHeight       int
