@@ -27,7 +27,7 @@ var gRoomsArrayLength int
 // 4*7 is the theoretical maximum of next possible steps.
 // That is: All the 7 hall places are empty and each of the 4 rooms tries all different hall placements.
 var gNextSteps [28]RoomState
-var gStepCost = [...]int{1, 10, 100, 1000}
+var gStepCost = [...]int{1, 10, 100, 1000, 0, 0}
 var gMapping = map[byte]byte{'a': A, 'b': B, 'c': C, 'd': D, ' ': EMPTY, 'x': X}
 
 type RoomState struct {
@@ -151,8 +151,35 @@ func calcNextSteps(s RoomState) int {
 
 	nextStepsCount := 0
 
+	p0, p1, p2 := getAt(s.hall, 3), getAt(s.hall, 5), getAt(s.hall, 7)
+
+	// Deadlock detection.
+	// If two characters need to go to the other side of each other, this situation can not be resolved!
+	// Relevant positions within the hall are: 3, 5, 7
+	// So we only check those positions explicitely!
+	if (p0 == A || p0 == B) && (p1 == D || p2 == D) {
+		return 0
+	}
+	if (p2 == C || p2 == D) && (p0 == A || p1 == A) {
+		return 0
+	}
+
+	minHallX, maxHallX := 0, HALL_LENGTH
+	// Divide-Conquer approach.
+	// If a character is in the middle hall from their corresponding room, only the target side of the rooms+hall
+	// matter right now. We can approach one side of the game state as a sub-problem and solve it independently first!
+	if p0 == A {
+		maxHallX = 3 + 1
+	} else if p2 == D {
+		minHallX = 7
+	} else if p1 == A || p1 == B {
+		maxHallX = 5 + 1
+	} else if p1 == C || p1 == D {
+		minHallX = 5
+	}
+
 	// Move from hall to destination room!
-	for i := 0; i < HALL_LENGTH; i++ {
+	for i := minHallX; i < maxHallX; i++ {
 		c := getAt(s.hall, i)
 
 		if c == EMPTY || c == X {
@@ -209,7 +236,7 @@ func calcNextSteps(s RoomState) int {
 		}
 
 		// Check open positions to the left and break if one is not empty
-		for p := hallCol - 1; p >= 0; p-- {
+		for p := hallCol - 1; p >= minHallX; p-- {
 
 			h := getAt(s.hall, p)
 			if h == X {
@@ -222,7 +249,7 @@ func calcNextSteps(s RoomState) int {
 			nextStepsCount++
 		}
 		// Check open positions to the right and break if one is not empty
-		for p := hallCol + 1; p < HALL_LENGTH; p++ {
+		for p := hallCol + 1; p < maxHallX; p++ {
 			h := getAt(s.hall, p)
 			if h == X {
 				continue
@@ -319,7 +346,6 @@ func main() {
 		timings[i] = time.Since(start).Milliseconds()
 
 		fmt.Printf("Part %v: %v in %vms\n", i+1, score, timings[i])
-
 	}
 
 	fmt.Printf("Total runtime: %vms\n", timings[0]+timings[1])
