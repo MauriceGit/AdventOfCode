@@ -342,8 +342,11 @@ func main() {
 		gRoomsArrayLength = part.roomsArrayLength
 
 		start := time.Now()
-		score := dijkstra(RoomState{0, part.hall, part.rooms})
-		timings[i] = time.Since(start).Milliseconds()
+		score := 0
+		for t := 0; t < 100; t++ {
+			score = dijkstra(RoomState{0, part.hall, part.rooms})
+		}
+		timings[i] = time.Since(start).Milliseconds() / 100
 
 		fmt.Printf("Part %v: %v in %vms\n", i+1, score, timings[i])
 	}
