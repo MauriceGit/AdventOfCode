@@ -32,3 +32,9 @@ All tests were run under Linux Mint on a desktop computer with a 9th generation 
 - Some calculations (is it possible to move up within the room) can be reduced to a single expression (with bit-operations on the int64)
 - Deadlock detection: Two pods are in a hall and would need to pass each other to reach their destination room (state can be discarded!)
 - Divide-and-Conquer approach: If a pod is in the hall, only the side to the destination room matters until the pod reached its room. If that is not possible, the situation can't be solved anyway.
+
+## Run
+
+>> go run .
+
+This will run my own input. For all possible input, change the "if false {" to true in the main function.
