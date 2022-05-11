@@ -45,4 +45,5 @@ To get the numbers above, run this program with all inputs (change the if in the
 
 Then run
 > eval_all_solutions.py
+
 to get the min/max/avg runtimes.
