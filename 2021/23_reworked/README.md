@@ -35,6 +35,6 @@ All tests were run under Linux Mint on a desktop computer with a 9th generation 
 
 ## Run
 
->> go run .
+> go run .
 
 This will run my own input. For all possible input, change the "if false {" to true in the main function.
