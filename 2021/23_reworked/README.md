@@ -38,3 +38,11 @@ All tests were run under Linux Mint on a desktop computer with a 9th generation 
 > go run .
 
 This will run my own input. For all possible input, change the "if false {" to true in the main function.
+
+## Calculate average runtimes
+
+To get the numbers above, run this program with all inputs (change the if in the main function to true) and replace the "all_solutions.txt" file with the output.
+
+Then run
+> eval_all_solutions.py
+to get the min/max/avg runtimes.
