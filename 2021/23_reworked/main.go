@@ -307,13 +307,15 @@ func main() {
 	//defer profile.Start(profile.ProfilePath(".")).Stop()
 
 	// This is not yet working. So ignore that. Need to revisit at some time for proper input parsing
-	if aoc, ok := InitAOC(); ok {
-		fmt.Println(aoc.GetGroups())
-		fmt.Println(aoc.GetChars())
-		fmt.Println(Chars(aoc.GetGroups()[0]))
-		var rooms [16]byte
-		for i, c := range aoc.GetChars() {
-			rooms[i%4] = c
+	if false {
+		if aoc, ok := InitAOC(); ok {
+			fmt.Println(aoc.GetGroups())
+			fmt.Println(aoc.GetChars())
+			fmt.Println(Chars(aoc.GetGroups()[0]))
+			var rooms [16]byte
+			for i, c := range aoc.GetChars() {
+				rooms[i%4] = c
+			}
 		}
 	}
 
