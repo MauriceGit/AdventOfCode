@@ -37,7 +37,8 @@ type RoomState struct {
 	hall int64
 	// 3 bit per entry. 0..3 == a..d, 4==empty.
 	// Max 16 places == 48bit --> 64bit int
-	rooms int64
+	rooms                int64
+	roomsReadyToMoveInto int16
 }
 
 type VisitedKey struct {
@@ -288,8 +289,33 @@ func precomputeMovingOutOfRoom(state RoomState) int {
 		if !isInFinalPosition(c, roomCol, yPos, state.rooms) {
 			cost += (yPos + 1) * gStepCost[c]
 		}
+
 	}
 	return cost
+}
+
+// All places are either empty or filled with the correct pod
+func roomIsClean(rooms int64, col int) bool {
+	for y := gRoomHeight; y >= 0; y-- {
+		c := getAt(rooms, y)
+		if c == EMPTY {
+			return true
+		}
+		if int(c) != col {
+			return false
+		}
+	}
+	return true
+}
+
+func initReadyToMoveIntoRooms(rooms int64) int8 {
+	var ready int8
+	for col := 0; col < 4; col++ {
+		if roomIsClean(rooms, col) {
+			ready = ready | (1 << col * gRoomHeight)
+		}
+	}
+	return ready
 }
 
 func dijkstra(state RoomState) int {
@@ -394,10 +420,10 @@ func main() {
 
 		start := time.Now()
 		score := 0
-		for t := 0; t < 1; t++ {
-			score = dijkstra(RoomState{0, part.hall, part.rooms})
+		for t := 0; t < 100; t++ {
+			score = dijkstra(RoomState{0, part.hall, part.rooms, 0})
 		}
-		timings[i] = time.Since(start).Milliseconds() / 1
+		timings[i] = time.Since(start).Milliseconds() / 100
 
 		fmt.Printf("Part %v: %v in %vms\n", i+1, score, timings[i])
 	}
