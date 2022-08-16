@@ -7,13 +7,13 @@ from utility import *
 
 def eval_cond(regs, c_reg, c_op, c_val):
     return {
-        "<": lambda: regs[c_reg] < int(c_val),
-        ">": lambda: regs[c_reg] > int(c_val),
-        ">=": lambda: regs[c_reg] >= int(c_val),
-        "<=": lambda: regs[c_reg] <= int(c_val),
-        "!=": lambda: regs[c_reg] != int(c_val),
-        "==": lambda: regs[c_reg] == int(c_val)
-    }[c_op]()
+        "<":  regs[c_reg] < int(c_val),
+        ">":  regs[c_reg] > int(c_val),
+        ">=": regs[c_reg] >= int(c_val),
+        "<=": regs[c_reg] <= int(c_val),
+        "!=": regs[c_reg] != int(c_val),
+        "==": regs[c_reg] == int(c_val)
+    }[c_op]
 
 
 def main():
