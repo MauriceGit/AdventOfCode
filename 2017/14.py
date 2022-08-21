@@ -36,17 +36,40 @@ def knot_hash(seed):
     return "".join(f"{x:02x}" for x in dense_hash)
 
 
-def main():
-    inputs = open_data("10.data")[0]
+def bfs(field, p, used):
+    queue = [p]
+    while len(queue) > 0:
+        pos = queue.pop(-1)
+        used.add(pos)
+        for n in dir_list_4():
+            new_pos = add(pos, n)
+            if new_pos in field and field[new_pos] == 1 and new_pos not in used:
+                queue.append(new_pos)
 
-    out, offset, _ = hash_round(ints(inputs), list(range(256)), 0)
-    print(out[offset%256]*out[(offset+1)%256])
-    print(knot_hash(inputs))
+
+def count_regions(d):
+    field = {(x,y): int(d[y][x]) for y in range(128) for x in range(128)}
+    used = set()
+    count = 0
+    for p in field:
+        if p not in used and field[p] == 1:
+            bfs(field, p, used)
+            count += 1
+    return count
+
+
+def main():
+    seed = open_data("14.data")[0]
+
+    d = {i: "".join(f"{int(v, base=16):04b}" for v in knot_hash(f"{seed}-{i}")) for i in range(128)}
+
+    print(sum(Counter(v)["1"] for v in d.values()))
+    print(count_regions(d))
 
 
 if __name__ == "__main__":
     main()
 
 # year 2017
-# solution for 10.01: 4480
-# solution for 10.02: c500ffe015c83b60fad2e4b7d59dabc4
+# solution for 14.01: 8304
+# solution for 14.02: 1018
