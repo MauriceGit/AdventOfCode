@@ -8,7 +8,9 @@ from utility import *
 def find_path(components, last_pin, current_strength, current_path, part2):
     max_strength = current_strength
     best_path = current_path
-    for c in filter(lambda x: last_pin in x, components):
+    for c in components:
+        if last_pin not in c:
+            continue
         pin_out = c[1] if c[0] == last_pin else c[0]
         s, path = find_path(components - {c}, pin_out, current_strength+sum(c), current_path + [c], part2)
 
