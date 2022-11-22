@@ -12,11 +12,21 @@ bool valid(int a, int b, int c) {
     return a+b > c && a+c > b && b+c > a;
 }
 
+bool valid(auto &r) {
+    int a[3]{};
+    int i{0};
+    for (const auto &tmp : r) {
+        a[i++] = tmp;
+    }
+    return a[0]+a[1] > a[2] && a[0]+a[2] > a[1] && a[1]+a[2] > a[0];
+}
+
 int main() {
 
     auto input = split(get_input("03.data"), "\n");
 
-    for (int ii = 0; ii < 1000; ii++) {
+    int sum{0};
+    for (int ii = 0; ii < 10000; ii++) {
         auto to_numbers = [](auto v){
             auto to_int = [](const auto &sv){
                 int c;
@@ -29,26 +39,34 @@ int main() {
         auto lines = input | views::transform(to_numbers);
 
         auto to_valid = [](auto l){
-            return static_cast<int>(valid(*ranges::next(l.begin(), 0), *ranges::next(l.begin(), 1), *ranges::next(l.begin(), 2)));
+            return static_cast<int>(valid(l));
         };
 
         auto tmp = lines | views::transform(to_valid);
         // accumulate didn't make it into ranges for c++20, so we have to call it explicitely. It will be added in c++23 though.
         //fmt::print("{}\n",  accumulate(tmp.begin(), tmp.end(), 0));
+        sum += accumulate(tmp.begin(), tmp.end(), 0);
 
         int count{0};
-        auto line_count{distance(lines.begin(), lines.end())};
-        for (int i = 0; i < line_count; i += 3) {
-            auto l0 = *ranges::next(lines.begin(), i);
-            auto l1 = *ranges::next(lines.begin(), i+1);
-            auto l2 = *ranges::next(lines.begin(), i+2);
+        auto line{0};
+        int d[3][3]{};
 
-            count += valid(*ranges::next(l0.begin(), 0), *ranges::next(l1.begin(), 0), *ranges::next(l2.begin(), 0));
-            count += valid(*ranges::next(l0.begin(), 1), *ranges::next(l1.begin(), 1), *ranges::next(l2.begin(), 1));
-            count += valid(*ranges::next(l0.begin(), 2), *ranges::next(l1.begin(), 2), *ranges::next(l2.begin(), 2));
+        for (auto l : lines) {
+            int i{0};
+            for (const auto &tmp : l) {
+                d[i++][line%3] = tmp;
+            }
+            if (line%3 == 2) {
+                count += valid(d[0][0], d[0][1], d[0][2]);
+                count += valid(d[1][0], d[1][1], d[1][2]);
+                count += valid(d[2][0], d[2][1], d[2][2]);
+            }
+            line++;
         }
         //fmt::print("{}\n", count);
+        sum += count;
     }
+    fmt::print("{}\n", sum);
 
     return 0;
 }

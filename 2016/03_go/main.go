@@ -3,6 +3,8 @@ package main
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 )
 
 func valid(a, b, c int) int {
@@ -12,28 +14,46 @@ func valid(a, b, c int) int {
 	return 0
 }
 
+type triangle struct {
+	a, b, c int
+}
+
+func toInts(lines []string) []triangle {
+	ints := make([]triangle, 0, len(lines))
+	for _, l := range lines {
+		i := strings.Fields(l)
+		a, _ := strconv.Atoi(i[0])
+		b, _ := strconv.Atoi(i[1])
+		c, _ := strconv.Atoi(i[2])
+		ints = append(ints, triangle{a, b, c})
+	}
+	return ints
+}
+
 func main() {
 
 	if aoc, ok := InitAOC(); ok {
 		lines := aoc.GetLines()
 
-		count := 0
-		for _, l := range lines {
-			i := Ints(l)
-			count += valid(i[0], i[1], i[2])
-		}
-		fmt.Println(count)
+		sum := 0
+		for c := 0; c < 10000; c++ {
+			ints := toInts(lines)
+			count := 0
+			for _, l := range ints {
+				count += valid(l.a, l.b, l.c)
+			}
+			//fmt.Println(count)
+			sum += count
 
-		count = 0
-		for i := 0; i < len(lines); i += 3 {
-			i0 := Ints(lines[i])
-			i1 := Ints(lines[i+1])
-			i2 := Ints(lines[i+2])
-
-			count += valid(i0[0], i1[0], i2[0])
-			count += valid(i0[1], i1[1], i2[1])
-			count += valid(i0[2], i1[2], i2[2])
+			count = 0
+			for i := 0; i < len(ints); i += 3 {
+				count += valid(ints[i].a, ints[i+1].a, ints[i+2].a)
+				count += valid(ints[i].b, ints[i+1].b, ints[i+2].b)
+				count += valid(ints[i].c, ints[i+1].c, ints[i+2].c)
+			}
+			//fmt.Println(count)
+			sum += count
 		}
-		fmt.Println(count)
+		fmt.Println(sum)
 	}
 }
