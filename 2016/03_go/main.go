@@ -38,21 +38,17 @@ func main() {
 		sum := 0
 		for c := 0; c < 10000; c++ {
 			ints := toInts(lines)
-			count := 0
-			for _, l := range ints {
-				count += valid(l.a, l.b, l.c)
+			count1 := 0
+			count2 := 0
+			for i, l := range ints {
+				count1 += valid(l.a, l.b, l.c)
+				if i%3 == 2 {
+					count2 += valid(ints[i].a, ints[i-1].a, ints[i-2].a)
+					count2 += valid(ints[i].b, ints[i-1].b, ints[i-2].b)
+					count2 += valid(ints[i].c, ints[i-1].c, ints[i-2].c)
+				}
 			}
-			//fmt.Println(count)
-			sum += count
-
-			count = 0
-			for i := 0; i < len(ints); i += 3 {
-				count += valid(ints[i].a, ints[i+1].a, ints[i+2].a)
-				count += valid(ints[i].b, ints[i+1].b, ints[i+2].b)
-				count += valid(ints[i].c, ints[i+1].c, ints[i+2].c)
-			}
-			//fmt.Println(count)
-			sum += count
+			sum += count1 + count2
 		}
 		fmt.Println(sum)
 	}
