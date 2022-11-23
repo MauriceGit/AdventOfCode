@@ -36,7 +36,7 @@ func main() {
 		lines := aoc.GetLines()
 
 		sum := 0
-		for c := 0; c < 10000; c++ {
+		for c := 0; c < 1; c++ {
 			ints := toInts(lines)
 			count1 := 0
 			count2 := 0
@@ -49,7 +49,13 @@ func main() {
 				}
 			}
 			sum += count1 + count2
+			fmt.Println(count1)
+			fmt.Println(count2)
 		}
-		fmt.Println(sum)
+		//fmt.Println(sum)
 	}
 }
+
+// year 2016
+// solution for 03.01: 983
+// solution for 03.02: 1836

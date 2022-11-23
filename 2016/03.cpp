@@ -26,7 +26,7 @@ int main() {
     auto input = split(get_input("03.data"), "\n");
 
     int sum{0};
-    for (int ii = 0; ii < 10000; ii++) {
+    for (int ii = 0; ii < 1; ii++) {
         auto to_numbers = [](auto v){
             auto to_int = [](const auto &sv){
                 int c;
@@ -44,8 +44,8 @@ int main() {
 
         auto tmp = lines | views::transform(to_valid);
         // accumulate didn't make it into ranges for c++20, so we have to call it explicitely. It will be added in c++23 though.
-        //fmt::print("{}\n",  accumulate(tmp.begin(), tmp.end(), 0));
-        sum += accumulate(tmp.begin(), tmp.end(), 0);
+        fmt::print("{}\n",  accumulate(tmp.begin(), tmp.end(), 0));
+        //sum += accumulate(tmp.begin(), tmp.end(), 0);
 
         int count{0};
         auto line{0};
@@ -63,10 +63,14 @@ int main() {
             }
             line++;
         }
-        //fmt::print("{}\n", count);
-        sum += count;
+        fmt::print("{}\n", count);
+        //sum += count;
     }
-    fmt::print("{}\n", sum);
+    //fmt::print("{}\n", sum);
 
     return 0;
 }
+
+// year 2016
+// solution for 03.01: 983
+// solution for 03.02: 1836

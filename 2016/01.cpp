@@ -38,3 +38,7 @@ int main() {
     fmt::print("{}\n", first_double);
     return 0;
 }
+
+// year 2016
+// solution for 01.01: 300
+// solution for 01.02: 159

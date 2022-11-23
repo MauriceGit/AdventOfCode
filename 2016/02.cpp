@@ -63,3 +63,7 @@ int main() {
 
     return 0;
 }
+
+// year 2016
+// solution for 02.01: 38961
+// solution for 02.02: 46C92
