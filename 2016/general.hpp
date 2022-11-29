@@ -5,17 +5,26 @@
 #include <fstream>
 #include <ranges>
 #include <charconv>
+#include <vector>
 
 using namespace std;
 
 namespace general {
 
-string get_input(string path) {
-    ifstream f(path, ios::in | ios::binary);
-    const auto size = filesystem::file_size(path);
-    string buf(size, '\0');
-    f.read(buf.data(), size);
-    return buf;
+vector<string> get_lines(string path) {
+    vector<string> lines{};
+    ifstream ifs;
+    string tmp;
+    ifs.open(path, ios::in);
+    if(ifs) {
+        while (!ifs.eof()) {
+            string tmp;
+            getline(ifs, tmp);
+            lines.push_back(tmp);
+        }
+        ifs.close();
+    }
+    return lines;
 }
 
 // returns a range of string_views
@@ -23,6 +32,12 @@ auto split(string_view str, string_view delim) {
     return str | ranges::views::split(delim) | ranges::views::transform([](auto &&rng) {
         return string_view(&*rng.begin(), ranges::distance(rng));
     });
+}
+
+vector<string_view> split2(string_view str, string_view delim) {
+    vector<string_view> r{};
+    ranges::copy(split(str, delim), back_inserter(r));
+    return r;
 }
 
 }

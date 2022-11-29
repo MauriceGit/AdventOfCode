@@ -10,6 +10,6 @@ for f in $allCPP; do
     if [ "$1" == "clean" ]; then
         rm -f "$exe"
     else
-        g++-10 -o "$exe" "$f" -std=gnu++20 -O3 -lfmt
+        g++-12 -o "$exe" "$f" -std=c++2b -O3 -lfmt
     fi
 done
