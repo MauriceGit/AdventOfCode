@@ -18,8 +18,6 @@ from collections import defaultdict, Counter, deque
 # deque: --> doubly linked list!
 # append, appendleft, rotate(n=1), pop, popleft. Can be accessed just like a list with []!
 
-from fractions import gcd
-
 from recordtype import recordtype
 # example: Planet = recordtype("Planet", "p v")
 
@@ -205,7 +203,7 @@ def cmp(x1, x2):
 
 # Least common multiplier
 def lcm(a,b):
-    return (a*b)//gcd(a,b)
+    return (a*b)//math.gcd(a,b)
 
 def lmap(f, *iterables):
     return list(map(f, *iterables))
