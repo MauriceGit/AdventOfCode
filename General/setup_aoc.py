@@ -16,7 +16,11 @@ def setup_data(day, year):
     if os.path.isfile(data_file):
         return f"Data for day {day} already downloaded"
 
-    r = requests.get(f"https://adventofcode.com/{year}/day/{int(day)}/input", cookies=cookies)
+    headers = {
+        "User-Agent": "This script: https://github.com/MauriceGit/AdventOfCode/blob/master/General/setup_aoc.py is always manually called. I try not to spam requests. Mostly 1-3 times a day if possible! Otherwise mail me at: aoc[_at_]tollmien.de",
+        "From":       "aoc[_at_]tollmien.de"
+    }
+    r = requests.get(f"https://adventofcode.com/{year}/day/{int(day)}/input", cookies=cookies, headers=headers)
 
     with open(data_file, "w") as f:
         f.write(r.text)
