@@ -9,7 +9,7 @@ rps  = {"A": 0, "B": 1, "C": 2, 0: "X", 1: "Y", 2: "Z"}
 ps = {"AX": 4, "BX": 1, "CX": 7, "AY": 8, "BY": 5, "CY": 2, "AZ": 3, "BZ": 9, "CZ": 6}
 
 def chose(l, s):
-    return rps[(rps[l]+(-1 if s == "X" else 0 if s == "Y" else 1))%3]
+    return rps[(rps[l] + ord(s)-ord("Y"))%3]
 
 def main():
 
