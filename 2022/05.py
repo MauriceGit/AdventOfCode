@@ -14,7 +14,6 @@ def run(commands, crates, part1=True):
         else:
             crates[to-1].extend(crates[fr-1][-c:])
             del crates[fr-1][-c:]
-
     return "".join(map(lambda x: x[-1], crates))
 
 
@@ -22,10 +21,7 @@ def main():
 
     groups = open_data_groups("05.data")
 
-    layout = []
-    for l in groups[0][:-1]:
-        layout.append([l[i:i+4][1] for i in range(0, len(l), 4)])
-
+    layout = [[l[i] for i in range(1, len(l), 4)] for l in groups[0][:-1]]
     crates = [list(filter(lambda x: x != " ", l[::-1])) for l in np.transpose(layout)]
 
     print(run(groups[1], deepcopy(crates)))
