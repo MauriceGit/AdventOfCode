@@ -8,12 +8,8 @@ from utility import *
 def run(commands, crates, part1=True):
     for instr in commands:
         c, fr, to = ints(instr)
-        if part1:
-            for i in range(c):
-                crates[to-1].append(crates[fr-1].pop())
-        else:
-            crates[to-1].extend(crates[fr-1][-c:])
-            del crates[fr-1][-c:]
+        crates[to-1].extend(crates[fr-1][-c:][::-1] if part1 else crates[fr-1][-c:])
+        del crates[fr-1][-c:]
     return "".join(map(lambda x: x[-1], crates))
 
 
