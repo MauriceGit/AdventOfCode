@@ -36,5 +36,5 @@ if __name__ == "__main__":
     main()
 
 # year 2022
-# solution for 05.01: ?
-# solution for 05.02: ?
+# solution for 05.01: SHQWSRBDL
+# solution for 05.02: CDTQZHBRS
