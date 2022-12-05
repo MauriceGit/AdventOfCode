@@ -12,6 +12,10 @@ from operator import itemgetter
 
 import re
 
+from copy import deepcopy
+
+import numpy as np
+
 from collections import defaultdict, Counter, deque
 # Counter() creates a dictionary with "elem: count" for each element in the list.
 #
