@@ -8,7 +8,7 @@ from utility import *
 def main():
 
     line = open_data("06.data")[0]
-    print("\n".join(map(str, (next(i+n for i in range(len(line)) if len(set(line[i:i+n])) == n) for n in [4, 14]))))
+    print(*[next(i+n for i in range(len(line)) if len(set(line[i:i+n])) == n) for n in [4, 14]], sep="\n")
 
 
 if __name__ == "__main__":
