@@ -70,10 +70,10 @@ def main():
     print(count(root)[1])
     size_all, _, sizes = count(root)
 
-    to_delete = 70000000 - size_all
+    to_delete = 30000000 - (70000000 - size_all)
     sizes.sort()
 
-    print(sizes)
+    #print(sizes)
 
     for s in sizes:
         if s >= to_delete:
