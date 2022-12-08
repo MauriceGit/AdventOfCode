@@ -6,90 +6,45 @@ from utility import *
 
 
 def count(current):
-
     sums_all = 0
-    sums_ok = 0
     dir_sizes = []
 
-    for d in current["dirs"]:
-        tmp, tmp_ok, tmp_sizes = count(d)
-        if tmp <= 100000:
-            #print(f"directory {current['name']} has size {tmp}")
-            sums_ok += tmp
+    for d in set(current["dirs"].keys()) - {"..", "/"}:
+        tmp, tmp_sizes = count(current["dirs"][d])
         sums_all += tmp
-        sums_ok += tmp_ok
-        dir_sizes.append(tmp)
         dir_sizes.extend(tmp_sizes)
 
-    file_sum = 0
-    for f in current["files"]:
-        file_sum += f[1]
-    #print("sums file", file_sum)
-
-    #print("sums ok: ", sums_ok)
-
-    return sums_all+file_sum, sums_ok, dir_sizes
-
-
+    # current directory
+    dir_sizes.append(sums_all+current["file_sizes"])
+    return sums_all+current["file_sizes"], dir_sizes
 
 
 def main():
 
     lines = open_data("07.data")
 
-    root = {"..": None, "dirs": [], "files": [], "name": "/"}
-    current = None
-    # dir -> dict("..": up_dict, "dirs": [], "files": [])
+    root = {"dirs": {"..": None, "/": None}, "file_sizes": 0}
+    root["dirs"]["/"] = root
+    current = root
 
     for l in lines:
         if l.startswith("$"):
             cmd = l.split(" ")
             if cmd[1] == "cd":
-                if cmd[2] == "/":
-                    current = root
-                else:
-                    if cmd[2] == "..":
-                        current = current[".."]
-                    else:
-                        new_d = {"..": current, "dirs": [], "files": [], "name": cmd[2]}
-                        current["dirs"].append(new_d)
-                        current = new_d
+                if cmd[2] not in current["dirs"]:
+                    current["dirs"][cmd[2]] = {"dirs": {"..": current, "/": root}, "file_sizes": 0}
+                current = current["dirs"][cmd[2]]
+        elif (t := l.split(" ")) and t[0] != "dir":
+            current["file_sizes"] += int(t[0])
 
-            if cmd[1] == "ls":
-                pass
-        else:
-            # list of files and sizes
-            size, fd = l.split(" ")
-            #print(f, size)
-            if size == "dir":
-                pass
-            else:
-                #current[2].append((fd, int(size)))
-                current["files"].append((fd, int(size)))
-
-    print(count(root)[1])
-    size_all, _, sizes = count(root)
-
-    to_delete = 30000000 - (70000000 - size_all)
-    sizes.sort()
-
-    #print(sizes)
-
-    for s in sizes:
-        if s >= to_delete:
-            print("to_delete", s)
-            break
-
-
-
-    # not 24390891
-
-
+    size_all, sizes = count(root)
+    print(sum(filter(lambda x: x <= 100000, sizes)))
+    print(next(filter(lambda x: x >= 30000000 - (70000000 - size_all), sorted(sizes))))
 
 
 if __name__ == "__main__":
     main()
 
 # year 2022
-# solution for 07.01: ?
-# solution for 07.02: ?
+# solution for 07.01: 1307902
+# solution for 07.02: 7068748
