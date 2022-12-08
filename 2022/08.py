@@ -6,34 +6,28 @@ from utility import *
 
 
 def treeline(field, pos, dx=None, dy=None):
-    ts = []
-    if not dx:
-        dx = (pos[0], pos[0]+1, 1)
-    if not dy:
-        dy = (pos[1], pos[1]+1, 1)
+    dx = (pos[0], pos[0]+1, 1) if not dx else dx
+    dy = (pos[1], pos[1]+1, 1) if not dy else dy
     for y in range(*dy):
         for x in range(*dx):
-            ts.append(field[(x, y)] < field[pos])
-    return ts
+            yield field[(x, y)] < field[pos]
 
 
 def visible(field, pos, w, h):
-    tls = [
+    return any([
         all(treeline(field, pos, dx=(pos[0]+1, w))),
         all(treeline(field, pos, dx=(0, pos[0]))),
         all(treeline(field, pos, dy=(pos[1]+1, h))),
         all(treeline(field, pos, dy=(0, pos[1])))
-    ]
-
-    return any(tls)
+    ])
 
 
 def scenic_score(field, pos, w, h):
     tls = [
-        treeline(field, pos, dx=(pos[0]+1, w)),
-        treeline(field, pos, dx=(pos[0]-1, -1, -1)),
-        treeline(field, pos, dy=(pos[1]+1, h)),
-        treeline(field, pos, dy=(pos[1]-1, -1, -1))
+        list(treeline(field, pos, dx=(pos[0]+1, w))),
+        list(treeline(field, pos, dx=(pos[0]-1, -1, -1))),
+        list(treeline(field, pos, dy=(pos[1]+1, h))),
+        list(treeline(field, pos, dy=(pos[1]-1, -1, -1)))
     ]
     tls = list(map(lambda x: len(x) if False not in x else x.index(False)+1, tls))
     return reduce(operator.mul, tls, 1)
