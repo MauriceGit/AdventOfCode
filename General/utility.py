@@ -295,7 +295,7 @@ def draw(f, symbols=None, print_directly=False, flip=False):
 
             p = (x,y)
             if p not in f:
-                c = -1
+                c = "."
             else:
                 c = f[p]
 
