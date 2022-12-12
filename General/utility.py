@@ -169,6 +169,7 @@ def add_surrounding_edge(graph, p):
 # edge_cost:        Function with state, current_pos and next_pos as parameters: edge_cost(state, pos, next_pos)
 # visit:            Function that gets called for every single node that gets reached (with minimum distance).
 #                   It expects state, pos, dist and path as parameters: visit(state, pos, dist, path)
+#                   visit() should return True to continue searching and False to stop visiting further nodes!
 # use_path:         True, if you need the actual shortest path from start to end. Will impact runtime!
 #                   Otherwise, the returned path will always be []
 def dijkstra(start_pos, get_neighbors, state=None, edge_cost=None, end_pos=None, visit=None, use_path=False):
@@ -273,6 +274,18 @@ def open_data_groups(filename, no_filter=False):
         return list(filter(lambda x: not x.startswith("//") and not x.strip() == "", g))
 
     return lmap(filter_, groups)
+
+#def _get_char(characters, start, end):
+#
+#
+#
+#def ocr(characters):
+#
+#    # Characters are always 4 chars wide and 6 chars large!
+#    if type(characters) == list and type(characters[0]) == str:
+#        substr
+#
+
 
 # Can draw a 2D-map of coordinates -> something in dictionary form.
 # Requires a dict of: (int, int): char
