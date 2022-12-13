@@ -41,7 +41,7 @@ def main():
     s = 0
     lines = []
     for i, g in enumerate(groups):
-        lines.extend([eval(g[0]), eval(g[1])])
+        lines.extend([loads(g[0]), loads(g[1])])
         if compare2(lines[-2], lines[-1]):
             s += i+1
     print(s)

@@ -11,6 +11,8 @@ import operator
 # to be imported as operator.mul for clarity!
 from operator import itemgetter
 
+from json import loads
+
 import re
 
 from copy import deepcopy
