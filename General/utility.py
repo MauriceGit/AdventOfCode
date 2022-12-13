@@ -3,7 +3,8 @@
 
 from collections import namedtuple
 
-from functools import lru_cache, reduce
+import functools
+from functools import lru_cache, reduce, cmp_to_key
 
 import operator
 # operator.mul clashes with my own mul function further down. So it needs
