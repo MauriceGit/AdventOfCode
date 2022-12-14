@@ -50,7 +50,21 @@ def main():
         rocks[(x, lowest_point+2)] = 3
 
     print(run(rocks.copy()))
-    print(run(rocks, part1=False))
+
+    # For part2: Every single position accessible by sand computed by Dijkstra is the exact same
+    # number as simulating all sand blocks individually. But much faster.
+    state = {"grid": rocks, "count": 0}
+    def get_neighbors(state, pos):
+        for d in [(0,1), (-1,1), (1,1)]:
+            if add(pos, d) not in state["grid"]:
+                yield add(pos, d)
+
+    def visit(state, pos, dist, path):
+        state["count"] += 1
+        return True
+
+    dijkstra((500, 0), get_neighbors, state=state, visit=visit)
+    print(state["count"])
 
 
 if __name__ == "__main__":
