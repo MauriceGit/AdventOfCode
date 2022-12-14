@@ -295,7 +295,7 @@ def open_data_groups(filename, no_filter=False):
 def draw(f, symbols=None, print_directly=False, flip=False):
 
     if symbols == None:
-        symbols = {-1: "█", 0: "█", 1: " ", 2: "0", 3: "#", 4: "X"}
+        symbols = {-1: ".", 0: " ", 1: "#", 2: "█", 3: "X", 4: "o"}
 
     min_x = min(f.keys(), key=lambda x: x[0])[0]
     min_y = min(f.keys(), key=lambda x: x[1])[1]
@@ -308,18 +308,16 @@ def draw(f, symbols=None, print_directly=False, flip=False):
 
     for y in y_range:
         for x in range(min_x, max_x+1):
-
-            p = (x,y)
-            if p not in f:
+            if (x,y) not in f:
                 c = "."
             else:
-                c = f[p]
+                c = f[(x,y)]
 
-            if print_directly:
+            if print_directly or c not in symbols:
                 symbols[c] = c
-            if c not in symbols:
-                symbols[c] = "?"
             print(symbols[c], end="")
-
         print("")
     print("")
+
+def draw_direct(f, symbols=None, flip=False):
+    draw(f, symbols=symbols, print_directly=True, flip=flip)
