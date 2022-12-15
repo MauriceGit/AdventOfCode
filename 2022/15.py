@@ -10,15 +10,12 @@ def main():
 
     lines = open_data("15.data")
 
-    #sensors = []
-    #beacons = []
     sensors = dict()
-
+    beacons = set()
     for line in lines:
         x,y, bx,by = ints(line)
-        #sensors.append((x,y))
-        #beacons.append((bx, by))
         sensors[(x,y)] = manhatten_dist((x,y), (bx, by))
+        beacons.add((bx,by))
 
     #yy = 2000000
     #grid_y = set()
@@ -32,36 +29,39 @@ def main():
 
     r = 4000000
     #r = 20
-    #for x in range(r+1):
-    #    for y in range(r+1):
+
+    #for y in range(r+1):
+    #    #for x in range(r+1):
+    #    x = 0
+    #    print(y)
+    #    while x <= r:
+    #        skip_x = 1
     #        found = True
     #        for s,d in sensors.items():
-    #            if manhatten_dist((x,y), s) <= d:
+    #            dd = manhatten_dist((x,y), s)
+    #            if dd <= d:
+    #                skip_x = max(1, d-dd)
     #                found = False
     #                break
+    #
     #        if found:
     #            print((x,y), x*4000000+y)
     #            return
+    #        x += skip_x
 
-    for y in range(r+1):
-        #for x in range(r+1):
-        x = 0
-        print(y)
-        while x <= r:
-            skip_x = 1
-            found = True
+    grid = dict()
+    poss = set(sensors.keys())
+    for y in range(-10,30):
+        for x in range(-10,30):
             for s,d in sensors.items():
-                dd = manhatten_dist((x,y), s)
-                if dd <= d:
-                    skip_x = max(1, d-dd)
-                    found = False
-                    break
+                if (x,y) in poss:
+                    grid[(x,y)] = '●'
+                elif (x,y) in beacons:
+                    grid[(x,y)] = '■'
+                elif manhatten_dist((x,y), s) <= d:
+                    grid[(x,y)] = 1 if (x,y) not in grid else grid[(x,y)]+1
 
-            if found:
-                print((x,y), x*4000000+y)
-                return
-            x += skip_x
-
+    draw_direct(grid)
 
 
 
@@ -76,5 +76,5 @@ if __name__ == "__main__":
     main()
 
 # year 2022
-# solution for 15.01: ?
-# solution for 15.02: ?
+# solution for 15.01: 5127797
+# solution for 15.02: 12518502636475
