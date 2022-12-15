@@ -20,9 +20,7 @@ def main():
         y_dist = abs(s[1] - yy)
         if y_dist < d:
             overlap = abs(y_dist-d)+1
-            for x in range(s[0]-overlap, s[0]+overlap):
-                if manhatten_dist((x,yy), s) <= d:
-                    grid_y.add((x,yy))
+            grid_y = grid_y.union(set(range(s[0]-overlap, s[0]+overlap)))
     print(len(grid_y)-1)
 
     r = 4000000
