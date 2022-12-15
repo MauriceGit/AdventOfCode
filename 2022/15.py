@@ -5,71 +5,41 @@ sys.path.append('../General')
 from utility import *
 
 
-
 def main():
 
     lines = open_data("15.data")
 
     sensors = dict()
-    beacons = set()
     for line in lines:
         x,y, bx,by = ints(line)
         sensors[(x,y)] = manhatten_dist((x,y), (bx, by))
-        beacons.add((bx,by))
 
-    #yy = 2000000
-    #grid_y = set()
-    #for s, b in sensors.items():
-    #    d = manhatten_dist(s, b)
-    #        for x in range(s[0]-d, s[0]+d):
-    #            if manhatten_dist((x,yy), s) <= d:
-    #                #grid_y[(x,10)] = 1
-    #                grid_y.add((x,yy))
-    #print(len(grid_y)-1)
+    yy = 2000000
+    grid_y = set()
+    for s, d in sensors.items():
+        y_dist = abs(s[1] - yy)
+        if y_dist < d:
+            overlap = abs(y_dist-d)+1
+            for x in range(s[0]-overlap, s[0]+overlap):
+                if manhatten_dist((x,yy), s) <= d:
+                    grid_y.add((x,yy))
+    print(len(grid_y)-1)
 
     r = 4000000
-    #r = 20
-
-    #for y in range(r+1):
-    #    #for x in range(r+1):
-    #    x = 0
-    #    print(y)
-    #    while x <= r:
-    #        skip_x = 1
-    #        found = True
-    #        for s,d in sensors.items():
-    #            dd = manhatten_dist((x,y), s)
-    #            if dd <= d:
-    #                skip_x = max(1, d-dd)
-    #                found = False
-    #                break
-    #
-    #        if found:
-    #            print((x,y), x*4000000+y)
-    #            return
-    #        x += skip_x
-
-    grid = dict()
-    poss = set(sensors.keys())
-    for y in range(-10,30):
-        for x in range(-10,30):
-            for s,d in sensors.items():
-                if (x,y) in poss:
-                    grid[(x,y)] = '●'
-                elif (x,y) in beacons:
-                    grid[(x,y)] = '■'
-                elif manhatten_dist((x,y), s) <= d:
-                    grid[(x,y)] = 1 if (x,y) not in grid else grid[(x,y)]+1
-
-    draw_direct(grid)
-
-
-
-
-
-
-
-
+    for s, d in sensors.items():
+        p = (s[0]-d-1, s[1])
+        for i in range(2*d):
+            for pp in (add(p, (i,i)), add(add(p, (d+1,-d-1)), (i,i)), add(p, (i,-i)), add(add(p, (d+1,d+1)), (i,-i))):
+                if pp[0] < 0 or pp[0] > r or pp[1] < 0 or pp[1] > r:
+                    continue
+                found = True
+                for s2, d2 in sensors.items():
+                    if s != s2 and manhatten_dist(pp, s2) <= d2:
+                        found = False
+                        break
+                if found:
+                    print(pp[0]*4000000+pp[1])
+                    return
 
 
 if __name__ == "__main__":
