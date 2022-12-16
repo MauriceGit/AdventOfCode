@@ -28,6 +28,7 @@ from collections import defaultdict, Counter, deque
 from recordtype import recordtype
 # example: Planet = recordtype("Planet", "p v")
 
+import heapq
 from heapq import heapify, heappop, heappush
 # queue = [(dist, pos, ...)]
 # heapify(queue)
