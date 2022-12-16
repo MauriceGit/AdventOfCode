@@ -7,51 +7,6 @@ from utility import *
 Valve = recordtype("Valve", "flow_rate is_open tunnels")
 State = recordtype("State", "score open_valves v minutes history")
 
-def bfs(valves, max_minutes):
-    best = State(0, None, "", 0, "")
-    queue = [State(0, set(), "AA", 0, "AA")]
-    #heapify(queue)
-    heapq._heapify_max(queue)
-
-    cache = dict()
-
-    while len(queue) > 0:
-        #state = heappop(queue)
-        state = heapq._heappop_max(queue) # pop from maxheap
-        #state = queue.pop()
-
-
-        if state.minutes >= max_minutes:
-            if state.score > best.score:
-                best = state
-                print(best.score, best.history)
-            continue
-
-
-
-        new_score = state.score + sum([v.flow_rate for k,v in valves.items() if k in state.open_valves])
-        #state.pressure_release.append(sum([v.flow_rate for k,v in valves.items() if k in state.open_valves]))
-        #state.score += sum([v.flow_rate for k,v in valves.items() if k in state.open_valves])
-
-        # we don't pop from the queue so this element has high priority next round!
-        if valves[state.v].flow_rate > 0 and not state.v in state.open_valves:
-            #score = sum(state.pressure_release)
-            #history = state.history+f" [{state.v}]"
-            next_state = State(new_score, state.open_valves.union({state.v}), state.v, state.minutes+1, "")
-            heappush(queue, next_state)
-            #queue.append(next_state)
-            continue
-
-        #print(state.v, list(sorted(valves[state.v].tunnels, key=lambda x: valves[x].flow_rate, reverse=True)))
-        for v in sorted(valves[state.v].tunnels, key=lambda x: valves[x].flow_rate, reverse=False):
-            #score = sum(state.pressure_release)
-            history = state.history+" -> "+v
-            next_state = State(new_score, state.open_valves.copy(), v, state.minutes+1, "")
-            heappush(queue, next_state)
-            #queue.append(next_state)
-
-    return best
-
 
 cache = dict()
 
