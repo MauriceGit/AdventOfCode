@@ -141,6 +141,10 @@ def dir_list_4():
 def dir_list_8():
     return dir_list_4() + [(1,1), (-1,-1), (-1,1), (1,-1)]
 
+@lru_cache(maxsize=10)
+def dir_list_3D_6():
+    return [(1,0,0),(-1,0,0),(0,1,0),(0,-1,0),(0,0,1),(0,0,-1)]
+
 # Takes a direction tuple and rotates it in 2D in the given direction
 # ignores a count=0 and still rotates at least once!
 def rotate(d, left, count=1):
