@@ -76,9 +76,9 @@ def main():
         best_result = 0
         max_needed = [max(bp, key=lambda x: x[i])[i] for i in range(4)]
         r = run_blueprint(bp, max_needed, [0,0,0,0], [1,0,0,0], 0, 24)
-        print(f"Blueprint {i+1} can create {r} geodes")
+        #print(f"Blueprint {i+1} can create {r} geodes")
         quality += (i+1)*r
-    print(f"Overall quality: {quality}")
+    print(quality)
 
     part2 = 1
     for i,bp in enumerate(blueprints[:3]):
@@ -87,7 +87,7 @@ def main():
         max_needed = [max(bp, key=lambda x: x[i])[i] for i in range(4)]
         r = run_blueprint(bp, max_needed, [0,0,0,0], [1,0,0,0], 0, 32)
         part2 *= r
-    print(f"Part2: {part2}")
+    print(part2)
 
 
 if __name__ == "__main__":
