@@ -39,7 +39,7 @@ def main():
     print(get_solution(p1n, num_0, number_mapping))
 
     orig_numbers = numbers.copy()
-    for i in range(1):
+    for i in range(10):
         numbers = mix(orig_numbers, numbers, number_mapping2)
     print(get_solution(numbers, num_0, number_mapping2))
 
