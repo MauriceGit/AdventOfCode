@@ -15,22 +15,14 @@ def run(monkeys, current):
     l, op, r = monkeys[current]
 
     d = {"+": operator.add, "*": operator.mul, "/": lambda x,y: x//y, "-": lambda x,y: x-y}
-
     rl = run(monkeys, l)
     rr = run(monkeys, r)
     r = d[op](rl[0], rr[0])
 
-    if type(rl) == int and type(rr) == int:
-        return r, f"{rl[1]} {op} {rr[1]}"
-
     if current == "root":
-        op = "="
+        return f"{rl[1]} = {rr[0]}"
 
-    if type(rl) == int:
-        return r, f"{rl[0]} {op} ({rr[1]}))"
-    return r, f"({rl[1]}) {op} {rr[0]})"
-
-    #return r, f"({rl[1]}) {op} ({rr[1]})"
+    return r, f"({rl[1]}) {op} ({rr[1]})"
 
 
 
