@@ -61,6 +61,11 @@ from itertools import repeat, chain, islice, accumulate, permutations, combinati
 # for i in itertools.count():
 #    unbounded for loop! With index assigned to i. Awesome!
 
+from more_itertools import set_partitions
+# set_partitions can divide a list into n partitions with all possible combinations.
+# Example:
+# list(set_partitions([2,3,4], 2)) --> [[[2], [3, 4]], [[2, 3], [4]], [[3], [2, 4]]]
+
 import networkx as nx
 from networkx.algorithms.shortest_paths.weighted import single_source_dijkstra
 #
