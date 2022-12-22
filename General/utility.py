@@ -319,7 +319,7 @@ def draw(f, symbols=None, print_directly=False, flip=False):
     for y in y_range:
         for x in range(min_x, max_x+1):
             if (x,y) not in f:
-                c = "."
+                c = symbols[-1] if -1 in symbols else "."
             else:
                 c = f[(x,y)]
 
