@@ -65,8 +65,10 @@ def main():
         end = state["end"]
         positions = []
         pos, i = pos[0], pos[1]
-        if pos != start[0]:
+        if pos not in blizzard:
             positions.append((pos, i+1))
+
+        #print(list(blizzard.keys()))
 
         for d in dir_list_4():
             p = add(pos, d)
@@ -79,7 +81,7 @@ def main():
 
     res = dijkstra(start, get_neighbors, state=state, end_pos=end, use_path=True)
 
-    if True:
+    if False:
         for p in res[2]:
             g = dict()
             g[(-1,-1)] = "#"
@@ -95,8 +97,8 @@ def main():
             print(f"Minute {p[1]-1}")
             draw_direct(g)
 
-    print(res)
-    print(len(res[2]))
+    #print(res)
+    print(len(res[2])-1)
 
 
     #print(start, end)
