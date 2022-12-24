@@ -42,8 +42,10 @@ def main():
                 blizzards[(x-1,y-1)].append(to_dir[c])
 
     states = [blizzards]
-    for i in range(1000):
+    for i in range(500):
         states.append(simulate(states[-1], field_size))
+
+    print("Done generating.")
 
         #g = dict()
         #for b, dirs in states[-1].items():
@@ -55,20 +57,18 @@ def main():
 
     #return
 
-    state = {"blizzards": states, "field_size": field_size, "start": start, "end": end}
+    #state = {"blizzards": states, "field_size": field_size, "start": start, "end": end}
 
 
     def get_neighbors(state, pos):
+        #print(pos[1])
         blizzard = state["blizzards"][pos[1]]
         fs = state["field_size"]
-        start = state["start"]
         end = state["end"]
         positions = []
         pos, i = pos[0], pos[1]
         if pos not in blizzard:
             positions.append((pos, i+1))
-
-        #print(list(blizzard.keys()))
 
         for d in dir_list_4():
             p = add(pos, d)
@@ -78,8 +78,8 @@ def main():
                 return [end]
         return positions
 
-
-    res = dijkstra(start, get_neighbors, state=state, end_pos=end, use_path=True)
+    state = {"blizzards": states, "field_size": field_size, "start": start, "end": end}
+    res = dijkstra(start, get_neighbors, state=state, end_pos=end)
 
     if False:
         for p in res[2]:
@@ -97,8 +97,26 @@ def main():
             print(f"Minute {p[1]-1}")
             draw_direct(g)
 
-    #print(res)
-    print(len(res[2])-1)
+    a = res[1]
+    print(a)
+
+    new_start = (end[0], a+1)
+    new_end = (start[0], -1)
+    state = {"blizzards": states, "field_size": field_size, "end": new_end}
+    res = dijkstra(new_start, get_neighbors, state=state, end_pos=new_end)
+
+    b = res[1]
+    print(b)
+
+    new_start = (start[0], b+1)
+    new_end = (end[0], -1)
+    state = {"blizzards": states, "field_size": field_size, "end": new_end}
+    res = dijkstra(new_start, get_neighbors, state=state, end_pos=new_end)
+
+    c = res[1]
+    print(c)
+
+    print(a+b+c)
 
 
     #print(start, end)
@@ -112,5 +130,5 @@ if __name__ == "__main__":
     main()
 
 # year 2022
-# solution for 24.01: > 219
+# solution for 24.01: 311
 # solution for 24.02: ?
