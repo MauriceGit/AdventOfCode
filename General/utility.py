@@ -185,7 +185,7 @@ def add_surrounding_edge(graph, p):
 #                   visit() should return True to continue searching and False to stop visiting further nodes!
 # use_path:         True, if you need the actual shortest path from start to end. Will impact runtime!
 #                   Otherwise, the returned path will always be []
-def dijkstra(start_pos, get_neighbors, state=None, edge_cost=None, end_pos=None, visit=None, use_path=False):
+def dijkstra(start_pos, get_neighbors, state=None, edge_cost=None, end_pos=None, visit=None, use_path=False, revisit_nodes=False):
 
     visited = set()
     queue = [(0, start_pos, [start_pos] if use_path else [])]
@@ -194,10 +194,11 @@ def dijkstra(start_pos, get_neighbors, state=None, edge_cost=None, end_pos=None,
     while len(queue) > 0:
         dist, pos, path = heappop(queue)
 
-        if pos in visited:
-            continue
+        if not revisit_nodes:
+            if pos in visited:
+                continue
 
-        visited.add(pos)
+            visited.add(pos)
 
         if visit is not None and not visit(state, pos, dist, path):
             return pos, dist, path
