@@ -34,15 +34,7 @@ def add_snafu(s1, s2):
 
 
 def snafu_to_int(number):
-    num = 0
-    for i, n in enumerate(number):
-        if n == "=":
-            num += 5**(len(number)-i-1) * -2
-        elif n == "-":
-            num += 5**(len(number)-i-1) * -1
-        else:
-            num += 5**(len(number)-i-1) * int(n)
-    return num
+    return sum(5**(len(number)-i-1) * from_snafu[n] for i,n in enumerate(number))
 
 
 def main():
