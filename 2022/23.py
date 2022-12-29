@@ -4,49 +4,59 @@ import sys
 sys.path.append('../General')
 from utility import *
 
-dirs = dict(zip(["E", "W", "S", "N", "SE", "NW", "SW", "NE"], dir_list_8()))
-to_i = {d: i for i,d in enumerate(dirs.keys())}
+class Dir(IntEnum):
+    E = 0
+    W = 1
+    S = 2
+    N = 3
+    SE = 4
+    NW = 5
+    SW = 6
+    NE = 7
+
+# order is important (same as Dir enum)! ["E", "W", "S", "N", "SE", "NW", "SW", "NE"]
+dirs = dir_list_8()
 
 def propose_move(elves, elve, rot):
-    check = [add(elve, dirs[k]) not in elves for k in dirs.keys()]
+    check = [add(elve, d) not in elves for d in dirs]
     if all(check):
-        return None
+        return None, None
 
     for i in range(4):
         match (i+rot)%4:
             case 0:
-                if check[to_i["N"]] and check[to_i["NE"]] and check[to_i["NW"]]:
-                    return add(elve, dirs["N"])
+                if check[Dir.N] and check[Dir.NE] and check[Dir.NW]:
+                    return add(elve, dirs[Dir.N]), dirs[Dir.N]
             case 1:
-                if check[to_i["S"]] and check[to_i["SE"]] and check[to_i["SW"]]:
-                    return add(elve, dirs["S"])
+                if check[Dir.S] and check[Dir.SE] and check[Dir.SW]:
+                    return add(elve, dirs[Dir.S]), dirs[Dir.S]
             case 2:
-                if check[to_i["W"]] and check[to_i["NW"]] and check[to_i["SW"]]:
-                    return add(elve, dirs["W"])
+                if check[Dir.W] and check[Dir.NW] and check[Dir.SW]:
+                    return add(elve, dirs[Dir.W]), dirs[Dir.W]
             case 3:
-                if check[to_i["E"]] and check[to_i["NE"]] and check[to_i["SE"]]:
-                    return add(elve, dirs["E"])
-    return None
+                if check[Dir.E] and check[Dir.NE] and check[Dir.SE]:
+                    return add(elve, dirs[Dir.E]), dirs[Dir.E]
+    return None, None
 
 
 def next_round(elves, i):
-    proposed = dict()
-    spots = defaultdict(int)
+    someone_moved = 0
+    cpy = elves.copy()
 
-    # First halve round
-    for e in elves:
-        p = propose_move(elves, e, i)
-        proposed[e] = p if p is not None else e
-        spots[proposed[e]] += 1
+    for e in cpy:
+        p, d = propose_move(cpy, e, i)
 
-    someone_moved = False
-    for e in list(elves):
-        if spots[proposed[e]] == 1:
+        if p in elves:
+            # could only have come from the opposite side, so we just push him back!
+            elves.add(add(p, d))
+            elves.remove(p)
+            someone_moved -= 1
+        elif p != None:
+            elves.add(p)
             elves.remove(e)
-            elves.add(proposed[e])
-            someone_moved = someone_moved or proposed[e] != e
+            someone_moved += 1
 
-    return elves, not someone_moved
+    return elves, someone_moved == 0
 
 
 def main():
@@ -59,6 +69,7 @@ def main():
             if c == "#":
                 elves.add((x,y))
 
+    #draw_direct({p:'#' for p in elves} | {(0,0): '.', (5,5): '.'})
     for i in itertools.count():
         elves, done = next_round(elves, i)
 

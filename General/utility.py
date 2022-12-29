@@ -13,6 +13,8 @@ from operator import itemgetter
 
 from json import loads
 
+from enum import Enum, IntEnum
+
 import re
 
 from copy import deepcopy
