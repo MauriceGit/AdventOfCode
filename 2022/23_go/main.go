@@ -56,7 +56,7 @@ func add(p1, p2 Pos) Pos {
 	return Pos{p1.x + p2.x, p1.y + p2.y}
 }
 
-func proposeMove(elves map[Pos]int, elve Pos, rot int) (Pos, Pos, bool) {
+func proposeMove(elves map[Pos]int, elve Pos, rot int) (Pos, bool) {
 
 	allFree := true
 	for i, d := range allDirs {
@@ -65,55 +65,54 @@ func proposeMove(elves map[Pos]int, elve Pos, rot int) (Pos, Pos, bool) {
 		allFree = allFree && !ok
 	}
 	if allFree {
-		return elve, elve, false
+		return elve, false
 	}
 
 	for i := 0; i < 4; i++ {
 		switch (i + rot) % 4 {
 		case 0:
 			if check8[N] && check8[NE] && check8[NW] {
-				return add(elve, allDirs[N]), allDirs[N], true
+				return add(elve, allDirs[N]), true
 			}
 		case 1:
 			if check8[S] && check8[SE] && check8[SW] {
-				return add(elve, allDirs[S]), allDirs[S], true
+				return add(elve, allDirs[S]), true
 			}
 		case 2:
 			if check8[W] && check8[NW] && check8[SW] {
-				return add(elve, allDirs[W]), allDirs[W], true
+				return add(elve, allDirs[W]), true
 			}
 		case 3:
 			if check8[E] && check8[NE] && check8[SE] {
-				return add(elve, allDirs[E]), allDirs[E], true
+				return add(elve, allDirs[E]), true
 			}
 		}
 	}
 
-	return elve, elve, false
+	return elve, false
 }
 
 func nextRound(elves map[Pos]int, i int) (map[Pos]int, bool) {
 
-	newElves := make(map[Pos]int, len(elves))
-	someoneMoved := 0
+	toFrom := make(map[Pos]Pos)
 
 	for e, _ := range elves {
-		p, d, posOk := proposeMove(elves, e, i)
-
-		if _, ok := newElves[p]; ok {
-			newElves[add(p, d)] = 1
-			delete(newElves, p)
-			newElves[e] = 1
-			someoneMoved--
-		} else if posOk {
-			newElves[p] = 1
-			someoneMoved++
-		} else {
-			newElves[e] = 1
+		p, posOk := proposeMove(elves, e, i)
+		if posOk {
+			if _, ok := toFrom[p]; ok {
+				delete(toFrom, p)
+			} else {
+				toFrom[p] = e
+			}
 		}
 	}
 
-	return newElves, someoneMoved == 0
+	for to, from := range toFrom {
+		elves[to] = 1
+		delete(elves, from)
+	}
+
+	return elves, len(toFrom) == 0
 }
 
 func main() {
