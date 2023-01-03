@@ -4,9 +4,8 @@ package main
 import (
 	"fmt"
 	"strconv"
-
 	//"math"
-	"github.com/pkg/profile"
+	//"github.com/pkg/profile"
 )
 
 type Node struct {
@@ -16,9 +15,16 @@ type Node struct {
 }
 
 type LinkedList struct {
-	backing []Node
-	start   int
-	size    int
+	nextFree int
+	backing  []Node
+	start    int
+	size     int
+}
+
+func newLinkedList() LinkedList {
+	var ll LinkedList
+	ll.nextFree = -1
+	return ll
 }
 
 func (ll *LinkedList) RotateLeft(n int) {
@@ -35,8 +41,17 @@ func (ll *LinkedList) Append(v int) {
 		ll.backing = append(ll.backing, Node{0, v, 0})
 		ll.start = 0
 	} else {
-		ll.backing = append(ll.backing, Node{ll.backing[ll.start].prev, v, ll.start})
-		n := len(ll.backing) - 1
+
+		node := Node{ll.backing[ll.start].prev, v, ll.start}
+		n := ll.nextFree
+		if ll.nextFree != -1 {
+			ll.backing[ll.nextFree] = node
+			ll.nextFree = -1
+		} else {
+			ll.backing = append(ll.backing, node)
+			n = len(ll.backing) - 1
+		}
+
 		ll.backing[ll.backing[ll.start].prev].next = n
 		ll.backing[ll.start].prev = n
 	}
@@ -69,8 +84,11 @@ func (ll *LinkedList) PopLeft() int {
 	ll.backing[prev].next = next
 	ll.backing[next].prev = prev
 
+	ll.nextFree = ll.start
+
 	ll.start = next
 	ll.size--
+
 	return v
 }
 
@@ -120,10 +138,10 @@ func getSolution(numbers LinkedList, num0 int, numberMapping map[int]int) int {
 
 func main() {
 
-	defer profile.Start(profile.ProfilePath(".")).Stop()
+	//defer profile.Start(profile.ProfilePath(".")).Stop()
 
-	var numbers LinkedList
-	var numbers2 LinkedList
+	numbers := newLinkedList()
+	numbers2 := newLinkedList()
 	numberMapping := make(map[int]int)
 	numberMapping2 := make(map[int]int)
 	var origNumbers []int
@@ -144,17 +162,11 @@ func main() {
 		}
 	}
 
-	fmt.Println(len(numbers2.backing))
-
 	numbers = mix(numbers, origNumbers, numberMapping)
 	fmt.Println(getSolution(numbers, num0, numberMapping))
 
 	for i := 0; i < 10; i++ {
 		numbers2 = mix(numbers2, origNumbers, numberMapping2)
 	}
-
-	fmt.Println(len(numbers2.backing))
-
-	//fmt.Println(getSolution(numbers2, num0, numberMapping2))
-
+	fmt.Println(getSolution(numbers2, num0, numberMapping2))
 }
