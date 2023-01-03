@@ -4,19 +4,21 @@ package main
 import (
 	"fmt"
 	"strconv"
+
 	//"math"
-	//"github.com/pkg/profile"
+	"github.com/pkg/profile"
 )
 
 type Node struct {
-	prev *Node
+	prev int
 	v    int
-	next *Node
+	next int
 }
 
 type LinkedList struct {
-	start *Node
-	size  int
+	backing []Node
+	start   int
+	size    int
 }
 
 func (ll *LinkedList) RotateLeft(n int) {
@@ -24,35 +26,34 @@ func (ll *LinkedList) RotateLeft(n int) {
 		n = ll.size - ((-n) % ll.size)
 	}
 	for i := 0; i < n%ll.size; i++ {
-		ll.start = ll.start.next
+		ll.start = ll.backing[ll.start].next
 	}
 }
 
 func (ll *LinkedList) Append(v int) {
-	if ll.start == nil {
-		ll.start = &Node{nil, v, nil}
-		ll.start.prev = ll.start
-		ll.start.next = ll.start
+	if ll.size == 0 {
+		ll.backing = append(ll.backing, Node{0, v, 0})
+		ll.start = 0
 	} else {
-		n := &Node{ll.start.prev, v, ll.start}
-		ll.start.prev.next = n
-		ll.start.prev = n
+		ll.backing = append(ll.backing, Node{ll.backing[ll.start].prev, v, ll.start})
+		n := len(ll.backing) - 1
+		ll.backing[ll.backing[ll.start].prev].next = n
+		ll.backing[ll.start].prev = n
 	}
 	ll.size++
 }
 
 func (ll *LinkedList) AppendLeft(v int) {
 	ll.Append(v)
-	ll.start = ll.start.prev
+	ll.start = ll.backing[ll.start].prev
 }
 
 func (ll LinkedList) Index(v int) int {
 	count := 0
 	n := ll.start
-	start := true
 
-	for n.v != v && (start || n != ll.start) {
-		n = n.next
+	for ll.backing[n].v != v {
+		n = ll.backing[n].next
 		count++
 	}
 
@@ -60,32 +61,36 @@ func (ll LinkedList) Index(v int) int {
 }
 
 func (ll *LinkedList) PopLeft() int {
-	n := ll.start
+	v := ll.backing[ll.start].v
 
-	ll.start.prev.next = ll.start.next
-	ll.start.next.prev = ll.start.prev
+	prev := ll.backing[ll.start].prev
+	next := ll.backing[ll.start].next
 
-	ll.start = ll.start.next
-	n.next = nil
-	n.prev = nil
+	ll.backing[prev].next = next
+	ll.backing[next].prev = prev
+
+	ll.start = next
 	ll.size--
-	return n.v
-}
-
-func toString(node *Node, firstNode *Node, first bool, s string) string {
-	if !first && node == firstNode {
-		return s
-	}
-	pre := " -> "
-	if first {
-		pre = ""
-	}
-	return toString(node.next, firstNode, false, s+fmt.Sprintf("%v%v", pre, node.v))
-
+	return v
 }
 
 func (ll LinkedList) String() string {
-	return toString(ll.start, ll.start, true, "")
+	s := ""
+	n := ll.start
+	first := true
+
+	for first || n != ll.start {
+
+		pre := " -> "
+		if first {
+			pre = ""
+		}
+		s += fmt.Sprintf("%v%v", pre, ll.backing[n].v)
+
+		n = ll.backing[n].next
+		first = false
+	}
+	return s
 }
 
 func mix(numbers LinkedList, origNumbers []int, numberMapping map[int]int) LinkedList {
@@ -105,17 +110,17 @@ func getSolution(numbers LinkedList, num0 int, numberMapping map[int]int) int {
 	i := numbers.Index(num0)
 	numbers.RotateLeft(i)
 	numbers.RotateLeft(1000)
-	nn := numberMapping[numbers.start.v]
+	nn := numberMapping[numbers.backing[numbers.start].v]
 	numbers.RotateLeft(1000)
-	nn += numberMapping[numbers.start.v]
+	nn += numberMapping[numbers.backing[numbers.start].v]
 	numbers.RotateLeft(1000)
-	nn += numberMapping[numbers.start.v]
+	nn += numberMapping[numbers.backing[numbers.start].v]
 	return nn
 }
 
 func main() {
 
-	//defer profile.Start(profile.ProfilePath(".")).Stop()
+	defer profile.Start(profile.ProfilePath(".")).Stop()
 
 	var numbers LinkedList
 	var numbers2 LinkedList
@@ -139,12 +144,17 @@ func main() {
 		}
 	}
 
+	fmt.Println(len(numbers2.backing))
+
 	numbers = mix(numbers, origNumbers, numberMapping)
 	fmt.Println(getSolution(numbers, num0, numberMapping))
 
 	for i := 0; i < 10; i++ {
 		numbers2 = mix(numbers2, origNumbers, numberMapping2)
 	}
-	fmt.Println(getSolution(numbers2, num0, numberMapping2))
+
+	fmt.Println(len(numbers2.backing))
+
+	//fmt.Println(getSolution(numbers2, num0, numberMapping2))
 
 }
