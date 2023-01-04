@@ -27,7 +27,7 @@ func newLinkedList() LinkedList {
 	return ll
 }
 
-func newLinkedList(size int) LinkedList {
+func newLinkedListSize(size int) LinkedList {
 	var ll LinkedList
 	ll.nextFree = -1
 	ll.backing = make([]Node, size)
@@ -118,31 +118,61 @@ func (ll LinkedList) String() string {
 	return s
 }
 
-func findBucket(buckets []LinkedList, bi, offset, element int) (int, int) {
+func repositionNode(buckets []LinkedList, bi, offset, element int, numberMapping map[int]int, nToBucket *map[int]int) {
 	// count indices to get out of this bucket (and return early, if the element stays in this bucket!)
 
 	// we know, that element is in buckets[bi]!
 	count := 0
 	node := buckets[bi].start
+	nodeBi := bi
 	for buckets[bi].backing[node].v != element {
 		node = buckets[bi].backing[node].next
 		count++
 	}
 
-	// element will be inserted into the same bucket again
-	if offset < (buckets[bi].size-1)-count {
+	// TODO: negative offsets!!!!!!!!
 
+	// element will be inserted into the same bucket again
+	// node is the node that contains element!
+	newNode := node
+	if offset >= (buckets[bi].size-1)-count {
+		offset -= (buckets[bi].size - 1) - count
+
+		// offset whole buckets
+		for offset > buckets[bi].size {
+			offset -= buckets[bi].size
+			bi++
+			if bi >= len(buckets) {
+				bi = 0
+			}
+		}
+		newNode = buckets[bi].start
 	}
 
-	// offset whole buckets
+	for i := 0; i < offset; i++ {
+		newNode = buckets[bi].backing[newNode].next
+	}
 
-	// iterate target bucket to find exact insertion position
+	// nodeBi is the source bucket index
+	// node is the source node
+	// bi is the target bucket index
+	// newNode is the target node (insert node _after_?)
 
-	// insert number at target bucket
+	// Remove old node
+	prev := buckets[nodeBi].backing[node].prev
+	next := buckets[nodeBi].backing[node].next
+	buckets[nodeBi].backing[prev].next = next
+	buckets[nodeBi].backing[next].prev = prev
+	buckets[nodeBi].size--
+	//buckets[nodeBi].nextFree = node
 
-	// remove number from source bucket
-
-	// update nToBucket reference
+	// Insert new node
+	buckets[bi].backing = append(buckets[bi].backing, Node{newNode, element, buckets[bi].backing[newNode].next})
+	next = buckets[bi].backing[newNode].next
+	buckets[bi].backing[newNode].next = len(buckets[bi].backing) - 1
+	buckets[bi].backing[next].prev = len(buckets[bi].backing) - 1
+	buckets[bi].size++
+	(*nToBucket)[element] = bi
 
 }
 
@@ -157,12 +187,15 @@ func mix(buckets []LinkedList, origNumbers []int, numberMapping map[int]int, nTo
 	// }
 
 	for _, nn := range origNumbers {
-		bi := nToBucket[nn]
-		i := buckets[bi].Index(nn)
-		nextBi := findBucket(buckets, i)
+		bi := (*nToBucket)[nn]
+		//i := buckets[bi].Index(nn)
+		//nextBi := findBucket(buckets, i)
+
+		repositionNode(buckets, bi, numberMapping[nn], nn, numberMapping, nToBucket)
+
 	}
 
-	return numbers
+	return buckets
 }
 
 func getSolution(numbers LinkedList, num0 int, numberMapping map[int]int) int {
@@ -188,7 +221,7 @@ func main() {
 	bucketSize := 10
 	var buckets []LinkedList
 
-	buckets = append(buckets, newLinkedList(bucketSize))
+	buckets = append(buckets, newLinkedListSize(bucketSize))
 
 	numberMapping := make(map[int]int)
 	numberMapping2 := make(map[int]int)
@@ -215,13 +248,14 @@ func main() {
 			}
 		}
 	}
+	num0 = num0
 
-	numbers = mix(numbers, origNumbers, numberMapping, &nToBucket)
-	fmt.Println(getSolution(numbers, num0, numberMapping))
+	buckets = mix(buckets, origNumbers, numberMapping, &nToBucket)
+	//fmt.Println(getSolution(numbers, num0, numberMapping))
 
 	return
-	for i := 0; i < 10; i++ {
-		numbers2 = mix(numbers2, origNumbers, numberMapping2)
-	}
-	fmt.Println(getSolution(numbers2, num0, numberMapping2))
+	// for i := 0; i < 10; i++ {
+	// 	numbers2 = mix(numbers2, origNumbers, numberMapping2)
+	// }
+	// fmt.Println(getSolution(numbers2, num0, numberMapping2))
 }
