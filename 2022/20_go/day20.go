@@ -108,6 +108,10 @@ func (ll LinkedList) toString(mapping map[int]int) string {
 	n := ll.start
 	first := true
 
+	if ll.size == 0 {
+		return s
+	}
+
 	for first || n != ll.start {
 
 		pre := " -> "
@@ -131,37 +135,26 @@ func (ll LinkedList) String() string {
 	return ll.toString(nil)
 }
 
-func repositionNode(buckets []LinkedList, bi, offset, element int, nToBucket *map[int]int, mapping map[int]int) {
-	// count indices to get out of this bucket (and return early, if the element stays in this bucket!)
-
-	if offset == 0 {
-		return
-	}
-
-	// we know, that element is in buckets[bi]!
+// getOffsetNode Returns the node and bucketIndex that contains element and the Node and bucketIndex the given offset
+func getOffsetNode(buckets []LinkedList, bi, offset, element int) (int, int, int, int) {
 	count := 0
-	node := buckets[bi].start
 	nodeBi := bi
+	node := buckets[bi].start
 	for buckets[bi].backing[node].v != element {
 		node = buckets[bi].backing[node].next
 		count++
 	}
 
-	fmt.Printf("    node: %v at bucket %v | %v\n", node, nodeBi, buckets[bi].backing[node].toString(mapping))
-
-	// element will be inserted into the same bucket again
 	// node is the node that contains element!
 	newNode := node
-	fmt.Printf("    offset: %v, size: %v, count: %v, all: %v\n", offset, buckets[bi].size, count, (buckets[bi].size-1)-count)
 	if offset > (buckets[bi].size-1)-count {
 		offset -= (buckets[bi].size - 1) - count
-		fmt.Printf("    %v\n", offset)
 		bi = (bi + 1) % len(buckets)
 		// when jumping a bucket, we implicitely jump one element because we always insert _after_ a node.
 		offset--
 
 		// offset whole buckets
-		for offset > buckets[bi].size {
+		for offset >= buckets[bi].size {
 			offset -= buckets[bi].size
 			bi = (bi + 1) % len(buckets)
 		}
@@ -171,12 +164,23 @@ func repositionNode(buckets []LinkedList, bi, offset, element int, nToBucket *ma
 	for i := 0; i < offset; i++ {
 		newNode = buckets[bi].backing[newNode].next
 	}
+	return node, nodeBi, newNode, bi
+}
 
-	fmt.Printf("    newNode: %v at bucket %v | %v\n", newNode, bi, buckets[bi].backing[newNode].toString(mapping))
+func repositionNode(buckets []LinkedList, bi, offset, element int, nToBucket *map[int]int, mapping map[int]int) {
+	// count indices to get out of this bucket (and return early, if the element stays in this bucket!)
+
+	if offset == 0 {
+		return
+	}
+
+	node, nodeBi, newNode, bi := getOffsetNode(buckets, bi, offset, element)
+
+	//fmt.Printf("    %v --> newNode: %v at bucket %v | %v\n", buckets[nodeBi].backing[node].toString(mapping), newNode, bi, buckets[bi].backing[newNode].toString(mapping))
 
 	// The node is the very first node and would be inserted exactly at the end of the linkedList (offset == len(bucket))
 	// So we just move the start-pointer and are done.
-	if node == newNode {
+	if node == newNode && nodeBi == bi {
 		buckets[nodeBi].start = buckets[nodeBi].backing[node].next
 		return
 	}
@@ -198,7 +202,7 @@ func repositionNode(buckets []LinkedList, bi, offset, element int, nToBucket *ma
 	//buckets[nodeBi].nextFree = node
 
 	// for _, n := range buckets[bi].backing {
-	// 	fmt.Printf("  %v ", n)
+	//  fmt.Printf("  %v ", n)
 	// }
 	// fmt.Printf("\n")
 
@@ -211,7 +215,7 @@ func repositionNode(buckets []LinkedList, bi, offset, element int, nToBucket *ma
 	(*nToBucket)[element] = bi
 
 	// for _, n := range buckets[bi].backing {
-	// 	fmt.Printf("  %v ", n)
+	//  fmt.Printf("  %v ", n)
 	// }
 	// fmt.Printf("\n")
 
@@ -220,11 +224,11 @@ func repositionNode(buckets []LinkedList, bi, offset, element int, nToBucket *ma
 func mix(buckets []LinkedList, origNumbers []int, numberMapping map[int]int, nToBucket *map[int]int) []LinkedList {
 
 	// for _, nn := range origNumbers {
-	// 	i := numbers.Index(nn)
-	// 	numbers.RotateLeft(i)
-	// 	n := numbers.PopLeft()
-	// 	numbers.RotateLeft(numberMapping[nn])
-	// 	numbers.AppendLeft(n)
+	//  i := numbers.Index(nn)
+	//  numbers.RotateLeft(i)
+	//  n := numbers.PopLeft()
+	//  numbers.RotateLeft(numberMapping[nn])
+	//  numbers.AppendLeft(n)
 	// }
 
 	for _, nn := range origNumbers {
@@ -236,14 +240,15 @@ func mix(buckets []LinkedList, origNumbers []int, numberMapping map[int]int, nTo
 			offset = len(origNumbers) + offset - 1
 		}
 
-		fmt.Printf("    %v (%v): bucket: %v, offset: %v\n", nn, numberMapping[nn], bi, offset)
+		//fmt.Printf("    %v (%v): bucket: %v, offset: %v\n", nn, numberMapping[nn], bi, offset)
 
 		repositionNode(buckets, bi, offset, nn, nToBucket, numberMapping)
 
-		for _, b := range buckets {
-			fmt.Printf("[%v] -> ", b.toString(numberMapping))
-		}
-		fmt.Printf("\n")
+		// for _, b := range buckets {
+		// 	fmt.Printf("[%v] -> ", b.toString(numberMapping))
+		// }
+		// fmt.Printf("\n")
+		// fmt.Printf("\n")
 
 		//break
 	}
@@ -251,7 +256,7 @@ func mix(buckets []LinkedList, origNumbers []int, numberMapping map[int]int, nTo
 	return buckets
 }
 
-func getSolution(numbers LinkedList, num0 int, numberMapping map[int]int) int {
+func getSolution(buckets []LinkedList, num0 int, numberMapping map[int]int, nToBucket map[int]int, numberCount int) int {
 	// i := numbers.Index(num0)
 	// numbers.RotateLeft(i)
 	// numbers.RotateLeft(1000)
@@ -261,7 +266,11 @@ func getSolution(numbers LinkedList, num0 int, numberMapping map[int]int) int {
 	// numbers.RotateLeft(1000)
 	// nn += numberMapping[numbers.backing[numbers.start].v]
 
-	return 0
+	_, _, n0, b0 := getOffsetNode(buckets, nToBucket[num0], 1000%numberCount, num0)
+	_, _, n1, b1 := getOffsetNode(buckets, nToBucket[num0], 2000%numberCount, num0)
+	_, _, n2, b2 := getOffsetNode(buckets, nToBucket[num0], 3000%numberCount, num0)
+
+	return numberMapping[buckets[b0].backing[n0].v] + numberMapping[buckets[b1].backing[n1].v] + numberMapping[buckets[b2].backing[n2].v]
 }
 
 func main() {
@@ -271,7 +280,7 @@ func main() {
 	//numbers := newLinkedList()
 	//numbers2 := newLinkedList()
 
-	bucketSize := 3
+	bucketSize := 10000
 	var buckets []LinkedList
 
 	buckets = append(buckets, newLinkedListSize(bucketSize))
@@ -308,16 +317,21 @@ func main() {
 	num0 = num0
 
 	for _, b := range buckets {
-		fmt.Printf("[%v] -> ", b.toString(numberMapping))
+		fmt.Printf("[%v] -> ", b.toString(numberMapping2))
 	}
 	fmt.Printf("\n")
-	buckets = mix(buckets, origNumbers, numberMapping, &nToBucket)
+	buckets = mix(buckets, origNumbers, numberMapping2, &nToBucket)
 
-	//fmt.Println(getSolution(numbers, num0, numberMapping))
+	for _, b := range buckets {
+		fmt.Printf("[%v] -> ", b.toString(numberMapping2))
+	}
+	fmt.Printf("\n")
+
+	fmt.Println(getSolution(buckets, num0, numberMapping2, nToBucket, len(origNumbers)))
 
 	return
 	// for i := 0; i < 10; i++ {
-	// 	numbers2 = mix(numbers2, origNumbers, numberMapping2)
+	//  numbers2 = mix(numbers2, origNumbers, numberMapping2)
 	// }
 	// fmt.Println(getSolution(numbers2, num0, numberMapping2))
 }
