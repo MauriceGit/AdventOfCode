@@ -284,8 +284,10 @@ func main() {
 
 	bucketSize := 500000
 	var buckets Buckets
-
 	buckets = append(buckets, newLinkedList(bucketSize))
+
+	var buckets2 Buckets
+	buckets2 = append(buckets2, newLinkedList(bucketSize))
 
 	numberMapping := make(map[int]int)
 	numberMapping2 := make(map[int]int)
@@ -293,6 +295,7 @@ func main() {
 	var num0 int
 
 	nToBucket := make(map[int]int)
+	nToBucket2 := make(map[int]int)
 
 	if aoc, ok := InitAOC(); ok {
 		for i, v := range aoc.GetLines() {
@@ -309,6 +312,8 @@ func main() {
 
 			buckets[len(buckets)-1].Append(i)
 			nToBucket[i] = len(buckets) - 1
+			buckets2[len(buckets2)-1].Append(i)
+			nToBucket2[i] = len(buckets2) - 1
 
 			origNumbers = append(origNumbers, i)
 			if conv == 0 {
@@ -330,11 +335,11 @@ func main() {
 	// }
 	// fmt.Printf("\n")
 
-	fmt.Println(getSolution(buckets, num0, mapping, nToBucket, len(origNumbers)))
+	fmt.Println(getSolution(buckets, num0, numberMapping2, nToBucket2, len(origNumbers)))
 
-	return
-	// for i := 0; i < 10; i++ {
-	//  numbers2 = mix(numbers2, origNumbers, numberMapping2)
-	// }
-	// fmt.Println(getSolution(numbers2, num0, numberMapping2))
+	//return
+	for i := 0; i < 10; i++ {
+		buckets2 = mix(buckets2, origNumbers, numberMapping2, &nToBucket2)
+	}
+	fmt.Println(getSolution(buckets2, num0, numberMapping2, nToBucket2, len(origNumbers)))
 }
