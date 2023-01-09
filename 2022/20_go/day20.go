@@ -269,7 +269,7 @@ func getSolution(buckets Buckets, num0 int, numberMapping map[int]int, nToBucket
 	v1 := numberMapping[buckets[b1].backing[buckets[b1].backing[n1].next].v]
 	v2 := numberMapping[buckets[b2].backing[buckets[b2].backing[n2].next].v]
 
-	fmt.Println(v0, v1, v2)
+	//fmt.Println(v0, v1, v2)
 	return v0 + v1 + v2
 
 	//return numberMapping[buckets[b0].backing[n0].v] + numberMapping[buckets[b1].backing[n1].v] + numberMapping[buckets[b2].backing[n2].v]
@@ -335,7 +335,7 @@ func main() {
 	// }
 	// fmt.Printf("\n")
 
-	fmt.Println(getSolution(buckets, num0, numberMapping2, nToBucket2, len(origNumbers)))
+	fmt.Println(getSolution(buckets, num0, numberMapping, nToBucket, len(origNumbers)))
 
 	//return
 	for i := 0; i < 10; i++ {
