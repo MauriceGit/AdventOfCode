@@ -9,125 +9,71 @@ import (
 )
 
 type Node struct {
-	prev int
 	v    int
 	next int
 }
 
 type LinkedList struct {
-	nextFree int
-	backing  []Node
-	start    int
-	size     int
+	backing []Node
+	first   int
+	last    int
+	size    int
+}
+
+type Buckets []LinkedList
+
+func (b Buckets) at(bucketID, nodeIndex int) *Node {
+	return &b[bucketID].backing[nodeIndex]
+}
+
+func (b Buckets) first(bucketID int) Node {
+	return b[bucketID].backing[b[bucketID].first]
 }
 
 func (n Node) toString(mapping map[int]int) string {
-	return fmt.Sprintf("(%v %v %v)", n.prev, mapping[n.v], n.next)
+	return fmt.Sprintf("(e: %v nextI: %v)", mapping[n.v], n.next)
 }
 
-func newLinkedList() LinkedList {
+func newLinkedList(size int) LinkedList {
 	var ll LinkedList
-	ll.nextFree = -1
-	return ll
-}
-
-func newLinkedListSize(size int) LinkedList {
-	var ll LinkedList
-	ll.nextFree = -1
 	ll.backing = make([]Node, 0, size)
 	return ll
 }
 
-func (ll *LinkedList) RotateLeft(n int) {
-	if n < 0 {
-		n = ll.size - ((-n) % ll.size)
-	}
-	for i := 0; i < n%ll.size; i++ {
-		ll.start = ll.backing[ll.start].next
-	}
-}
-
 func (ll *LinkedList) Append(v int) {
-	if ll.size == 0 {
-		ll.backing = append(ll.backing, Node{0, v, 0})
-		ll.start = 0
+	ll.backing = append(ll.backing, Node{v, -1})
+	if ll.last != -1 {
+		ll.backing[ll.last].next = len(ll.backing) - 1
 	} else {
-
-		node := Node{ll.backing[ll.start].prev, v, ll.start}
-		n := ll.nextFree
-		if ll.nextFree != -1 {
-			ll.backing[ll.nextFree] = node
-			ll.nextFree = -1
-		} else {
-			ll.backing = append(ll.backing, node)
-			n = len(ll.backing) - 1
-		}
-
-		ll.backing[ll.backing[ll.start].prev].next = n
-		ll.backing[ll.start].prev = n
+		ll.first = len(ll.backing) - 1
 	}
+	ll.last = len(ll.backing) - 1
 	ll.size++
-}
-
-func (ll *LinkedList) AppendLeft(v int) {
-	ll.Append(v)
-	ll.start = ll.backing[ll.start].prev
-}
-
-func (ll LinkedList) Index(v int) int {
-	count := 0
-	n := ll.start
-
-	for ll.backing[n].v != v {
-		n = ll.backing[n].next
-		count++
-	}
-
-	return count
-}
-
-func (ll *LinkedList) PopLeft() int {
-	v := ll.backing[ll.start].v
-
-	prev := ll.backing[ll.start].prev
-	next := ll.backing[ll.start].next
-
-	ll.backing[prev].next = next
-	ll.backing[next].prev = prev
-
-	ll.nextFree = ll.start
-
-	ll.start = next
-	ll.size--
-
-	return v
 }
 
 func (ll LinkedList) toString(mapping map[int]int) string {
 	s := ""
-	n := ll.start
-	first := true
 
 	if ll.size == 0 {
 		return s
 	}
 
-	for first || n != ll.start {
-
+	for n := ll.first; n != -1; n = ll.backing[n].next {
 		pre := " -> "
-		if first {
+		if n == ll.first {
 			pre = ""
 		}
 		v := ll.backing[n].v
 		if tmp, ok := mapping[v]; ok {
 			v = tmp
 		}
-
 		s += fmt.Sprintf("%v%v", pre, v)
-
-		n = ll.backing[n].next
-		first = false
+		//n = ll.backing[n].next
+		// if n == -1 {
+		// 	break
+		// }
 	}
+
 	return s
 }
 
@@ -136,17 +82,39 @@ func (ll LinkedList) String() string {
 }
 
 // getOffsetNode Returns the node and bucketIndex that contains element and the Node and bucketIndex the given offset
-func getOffsetNode(buckets []LinkedList, bi, offset, element int) (int, int, int, int) {
+func getOffsetNode(buckets Buckets, bi, offset, element int, nToBucket *map[int]int, mapping map[int]int, edit bool) (int, int, int, int) {
 	count := 0
 	nodeBi := bi
-	node := buckets[bi].start
-	for buckets[bi].backing[node].v != element {
-		node = buckets[bi].backing[node].next
-		count++
+	node := buckets[bi].first
+
+	bb := buckets[bi].backing
+
+	// only the first element is referenced directly!
+	if bb[buckets[bi].first].v != element {
+		//offset++
+		for bb[bb[node].next].v != element {
+			node = bb[node].next
+			count++
+		}
+	}
+
+	if edit {
+		// Remove old node
+		if node == buckets[nodeBi].first && buckets.first(nodeBi).v == element {
+			buckets[nodeBi].first = buckets.at(nodeBi, node).next
+		} else {
+			nodeNext := buckets[nodeBi].backing[node].next
+			nodeNextNext := buckets[nodeBi].backing[nodeNext].next
+			buckets[nodeBi].backing[node].next = nodeNextNext
+		}
+		buckets[nodeBi].size--
 	}
 
 	// node is the node that contains element!
 	newNode := node
+
+	//fmt.Printf("  %v, offset: %v\n", mapping[buckets[bi].backing[newNode].v], offset)
+
 	if offset > (buckets[bi].size-1)-count {
 		offset -= (buckets[bi].size - 1) - count
 		bi = (bi + 1) % len(buckets)
@@ -158,32 +126,46 @@ func getOffsetNode(buckets []LinkedList, bi, offset, element int) (int, int, int
 			offset -= buckets[bi].size
 			bi = (bi + 1) % len(buckets)
 		}
-		newNode = buckets[bi].start
+		newNode = buckets[bi].first
 	}
 
+	// find node where we want to insert _after_
 	for i := 0; i < offset; i++ {
+		//fmt.Println(offset - i)
 		newNode = buckets[bi].backing[newNode].next
 	}
+
+	if edit {
+		// Insert new node
+		buckets[bi].backing = append(buckets[bi].backing, Node{element, buckets[bi].backing[newNode].next})
+		buckets[bi].backing[newNode].next = len(buckets[bi].backing) - 1
+		buckets[bi].size++
+		(*nToBucket)[element] = bi
+	}
+
 	return node, nodeBi, newNode, bi
 }
 
-func repositionNode(buckets []LinkedList, bi, offset, element int, nToBucket *map[int]int, mapping map[int]int) {
+func repositionNode(buckets Buckets, bi, offset, element int, nToBucket *map[int]int, mapping map[int]int) {
 	// count indices to get out of this bucket (and return early, if the element stays in this bucket!)
 
 	if offset == 0 {
 		return
 	}
 
-	node, nodeBi, newNode, bi := getOffsetNode(buckets, bi, offset, element)
+	// node is the node just BEFORE the one that contains element, so that we can remove the previous next reference
+	// Same thing for newNode!
+	//node, nodeBi, newNode, bi := getOffsetNode(buckets, bi, offset, element, nToBucket)
+	getOffsetNode(buckets, bi, offset, element, nToBucket, mapping, true)
 
 	//fmt.Printf("    %v --> newNode: %v at bucket %v | %v\n", buckets[nodeBi].backing[node].toString(mapping), newNode, bi, buckets[bi].backing[newNode].toString(mapping))
 
 	// The node is the very first node and would be inserted exactly at the end of the linkedList (offset == len(bucket))
 	// So we just move the start-pointer and are done.
-	if node == newNode && nodeBi == bi {
-		buckets[nodeBi].start = buckets[nodeBi].backing[node].next
-		return
-	}
+	// if node == newNode && nodeBi == bi {
+	// 	buckets[nodeBi].start = buckets[nodeBi].backing[node].next
+	// 	return
+	// }
 
 	// nodeBi is the source bucket index
 	// node is the source node
@@ -191,45 +173,54 @@ func repositionNode(buckets []LinkedList, bi, offset, element int, nToBucket *ma
 	// newNode is the target node (insert node _after_?)
 
 	// Remove old node
-	prev := buckets[nodeBi].backing[node].prev
-	next := buckets[nodeBi].backing[node].next
-	buckets[nodeBi].backing[prev].next = next
-	buckets[nodeBi].backing[next].prev = prev
-	buckets[nodeBi].size--
-	if buckets[nodeBi].start == node {
-		buckets[nodeBi].start = next
-	}
-	//buckets[nodeBi].nextFree = node
 
-	// for _, n := range buckets[bi].backing {
-	//  fmt.Printf("  %v ", n)
+	// fmt.Printf("Before everything: ")
+	// fmt.Printf("    First Index: %v --> ", buckets[bi].first)
+	// for i, n := range buckets[bi].backing {
+	// 	fmt.Printf("  [%v]%v ", i, n.toString(mapping))
 	// }
 	// fmt.Printf("\n")
 
-	// Insert new node
-	buckets[bi].backing = append(buckets[bi].backing, Node{newNode, element, buckets[bi].backing[newNode].next})
-	next = buckets[bi].backing[newNode].next
-	buckets[bi].backing[newNode].next = len(buckets[bi].backing) - 1
-	buckets[bi].backing[next].prev = len(buckets[bi].backing) - 1
-	buckets[bi].size++
-	(*nToBucket)[element] = bi
+	// fmt.Printf("Node: %v\n", buckets[nodeBi].backing[node].toString(mapping))
+
+	// if node == buckets[nodeBi].first && buckets.first(nodeBi).v == element {
+	// 	buckets[nodeBi].first = buckets.at(nodeBi, node).next
+	// } else {
+	// 	nodeNext := buckets[nodeBi].backing[node].next
+	// 	nodeNextNext := buckets[nodeBi].backing[nodeNext].next
+	// 	buckets[nodeBi].backing[node].next = nodeNextNext
+	// }
+	// buckets[nodeBi].size--
+
+	// fmt.Printf("After deletion:    ")
+	// fmt.Printf("    First Index: %v --> ", buckets[bi].first)
+	// for i, n := range buckets[bi].backing {
+	// 	fmt.Printf("  [%v]%v ", i, n.toString(mapping))
+	// }
+	// fmt.Printf("\n")
 
 	// for _, n := range buckets[bi].backing {
-	//  fmt.Printf("  %v ", n)
+	// 	fmt.Printf("  %v ", n)
+	// }
+	// fmt.Printf("\n")
+	// fmt.Println(buckets[bi].toString(nil))
+
+	// Insert new node
+	// buckets[bi].backing = append(buckets[bi].backing, Node{element, buckets[bi].backing[newNode].next})
+	// buckets[bi].backing[newNode].next = len(buckets[bi].backing) - 1
+	// buckets[bi].size++
+	// (*nToBucket)[element] = bi
+
+	// fmt.Printf("After insertion:   ")
+	// fmt.Printf("    First Index: %v --> ", buckets[bi].first)
+	// for i, n := range buckets[bi].backing {
+	// 	fmt.Printf("  [%v]%v ", i, n.toString(mapping))
 	// }
 	// fmt.Printf("\n")
 
 }
 
-func mix(buckets []LinkedList, origNumbers []int, numberMapping map[int]int, nToBucket *map[int]int) []LinkedList {
-
-	// for _, nn := range origNumbers {
-	//  i := numbers.Index(nn)
-	//  numbers.RotateLeft(i)
-	//  n := numbers.PopLeft()
-	//  numbers.RotateLeft(numberMapping[nn])
-	//  numbers.AppendLeft(n)
-	// }
+func mix(buckets Buckets, origNumbers []int, numberMapping map[int]int, nToBucket *map[int]int) Buckets {
 
 	for _, nn := range origNumbers {
 		bi := (*nToBucket)[nn]
@@ -237,10 +228,14 @@ func mix(buckets []LinkedList, origNumbers []int, numberMapping map[int]int, nTo
 		//nextBi := findBucket(buckets, i)
 		offset := numberMapping[nn]
 		if offset < 0 {
-			offset = len(origNumbers) + offset - 1
+			tmp := (-offset) % (len(origNumbers) - 1)
+			offset = len(origNumbers) - tmp - 1
 		}
+		offset = offset % (len(origNumbers) - 1)
 
 		//fmt.Printf("    %v (%v): bucket: %v, offset: %v\n", nn, numberMapping[nn], bi, offset)
+
+		//fmt.Printf("%v, offset: %v:\n", numberMapping[nn], offset)
 
 		repositionNode(buckets, bi, offset, nn, nToBucket, numberMapping)
 
@@ -256,7 +251,7 @@ func mix(buckets []LinkedList, origNumbers []int, numberMapping map[int]int, nTo
 	return buckets
 }
 
-func getSolution(buckets []LinkedList, num0 int, numberMapping map[int]int, nToBucket map[int]int, numberCount int) int {
+func getSolution(buckets Buckets, num0 int, numberMapping map[int]int, nToBucket map[int]int, numberCount int) int {
 	// i := numbers.Index(num0)
 	// numbers.RotateLeft(i)
 	// numbers.RotateLeft(1000)
@@ -266,11 +261,18 @@ func getSolution(buckets []LinkedList, num0 int, numberMapping map[int]int, nToB
 	// numbers.RotateLeft(1000)
 	// nn += numberMapping[numbers.backing[numbers.start].v]
 
-	_, _, n0, b0 := getOffsetNode(buckets, nToBucket[num0], 1000%numberCount, num0)
-	_, _, n1, b1 := getOffsetNode(buckets, nToBucket[num0], 2000%numberCount, num0)
-	_, _, n2, b2 := getOffsetNode(buckets, nToBucket[num0], 3000%numberCount, num0)
+	_, _, n0, b0 := getOffsetNode(buckets, nToBucket[num0], 1000%numberCount, num0, nil, numberMapping, false)
+	_, _, n1, b1 := getOffsetNode(buckets, nToBucket[num0], 2000%numberCount, num0, nil, numberMapping, false)
+	_, _, n2, b2 := getOffsetNode(buckets, nToBucket[num0], 3000%numberCount, num0, nil, numberMapping, false)
 
-	return numberMapping[buckets[b0].backing[n0].v] + numberMapping[buckets[b1].backing[n1].v] + numberMapping[buckets[b2].backing[n2].v]
+	v0 := numberMapping[buckets[b0].backing[buckets[b0].backing[n0].next].v]
+	v1 := numberMapping[buckets[b1].backing[buckets[b1].backing[n1].next].v]
+	v2 := numberMapping[buckets[b2].backing[buckets[b2].backing[n2].next].v]
+
+	fmt.Println(v0, v1, v2)
+	return v0 + v1 + v2
+
+	//return numberMapping[buckets[b0].backing[n0].v] + numberMapping[buckets[b1].backing[n1].v] + numberMapping[buckets[b2].backing[n2].v]
 }
 
 func main() {
@@ -280,10 +282,10 @@ func main() {
 	//numbers := newLinkedList()
 	//numbers2 := newLinkedList()
 
-	bucketSize := 10000
-	var buckets []LinkedList
+	bucketSize := 500000
+	var buckets Buckets
 
-	buckets = append(buckets, newLinkedListSize(bucketSize))
+	buckets = append(buckets, newLinkedList(bucketSize))
 
 	numberMapping := make(map[int]int)
 	numberMapping2 := make(map[int]int)
@@ -302,7 +304,7 @@ func main() {
 			//numbers2.Append(i)
 
 			if i != 0 && i%bucketSize == 0 {
-				buckets = append(buckets, newLinkedListSize(bucketSize))
+				buckets = append(buckets, newLinkedList(bucketSize))
 			}
 
 			buckets[len(buckets)-1].Append(i)
@@ -315,19 +317,20 @@ func main() {
 		}
 	}
 	num0 = num0
+	mapping := numberMapping
 
-	for _, b := range buckets {
-		fmt.Printf("[%v] -> ", b.toString(numberMapping2))
-	}
-	fmt.Printf("\n")
-	buckets = mix(buckets, origNumbers, numberMapping2, &nToBucket)
+	// for _, b := range buckets {
+	// 	fmt.Printf("[%v] -> ", b.toString(mapping))
+	// }
+	// fmt.Printf("\n")
+	buckets = mix(buckets, origNumbers, mapping, &nToBucket)
 
-	for _, b := range buckets {
-		fmt.Printf("[%v] -> ", b.toString(numberMapping2))
-	}
-	fmt.Printf("\n")
+	// for _, b := range buckets {
+	// 	fmt.Printf("[%v] -> ", b.toString(mapping))
+	// }
+	// fmt.Printf("\n")
 
-	fmt.Println(getSolution(buckets, num0, numberMapping2, nToBucket, len(origNumbers)))
+	fmt.Println(getSolution(buckets, num0, mapping, nToBucket, len(origNumbers)))
 
 	return
 	// for i := 0; i < 10; i++ {
