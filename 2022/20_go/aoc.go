@@ -16,7 +16,7 @@ type AOC struct {
 
 func (aoc *AOC) loadFile() bool {
 
-	file, err := os.Open("input.txt")
+	file, err := os.Open("../20.data")
 	if err != nil {
 		fmt.Println(err)
 		return false
