@@ -4,7 +4,6 @@ package main
 import (
 	"fmt"
 	"strconv"
-	//"math"
 	//"github.com/pkg/profile"
 )
 
@@ -70,10 +69,6 @@ func (ll LinkedList) toString(mapping map[int]int) string {
 			v = tmp
 		}
 		s += fmt.Sprintf("%v%v", pre, v)
-		//n = ll.backing[n].next
-		// if n == -1 {
-		// 	break
-		// }
 	}
 
 	return s
@@ -83,8 +78,7 @@ func (ll LinkedList) String() string {
 	return ll.toString(nil)
 }
 
-// getOffsetNode Returns the node and bucketIndex that contains element and the Node and bucketIndex the given offset
-func getOffsetNode(buckets Buckets, bi, offset, element int, nToBucket *map[int]int, mapping map[int]int, edit bool) (int, int, int, int) {
+func repositionNode(buckets Buckets, bi, offset, element int, nToBucket *map[int]int, mapping map[int]int) (int, int, int, int) {
 	count := 0
 	nodeBi := bi
 	node := buckets[bi].first
@@ -100,31 +94,24 @@ func getOffsetNode(buckets Buckets, bi, offset, element int, nToBucket *map[int]
 		}
 	}
 
-	if edit {
-		// Remove old node
-		if node == buckets[nodeBi].first && buckets.first(nodeBi).v == element {
-			buckets[nodeBi].first = buckets.at(nodeBi, node).next
-		} else {
-			nodeNext := buckets[nodeBi].backing[node].next
-			nodeNextNext := buckets[nodeBi].backing[nodeNext].next
-			buckets[nodeBi].backing[node].next = nodeNextNext
-		}
-		buckets[nodeBi].size--
+	// Remove old node
+	if node == buckets[nodeBi].first && buckets.first(nodeBi).v == element {
+		buckets[nodeBi].first = buckets.at(nodeBi, node).next
+	} else {
+		nodeNext := buckets[nodeBi].backing[node].next
+		nodeNextNext := buckets[nodeBi].backing[nodeNext].next
+		buckets[nodeBi].backing[node].next = nodeNextNext
 	}
+	buckets[nodeBi].size--
 
 	// node is the node that contains element!
 	newNode := node
-
-	//fmt.Printf("  %v, offset: %v\n", mapping[buckets[bi].backing[newNode].v], offset)
-	//fmt.Printf("offset: %v, size: %v, count: %v\n", offset, buckets[bi].size, count)
 
 	if offset > buckets[bi].size-count {
 		offset -= buckets[bi].size - count
 		bi = (bi + 1) % len(buckets)
 		// when jumping a bucket, we implicitely jump one element because we always insert _after_ a node.
 		offset--
-
-		//fmt.Printf("new offset: %v, next size: %v\n", offset, buckets[bi].size)
 
 		// offset whole buckets
 		for offset >= buckets[bi].size {
@@ -136,38 +123,22 @@ func getOffsetNode(buckets Buckets, bi, offset, element int, nToBucket *map[int]
 
 	// find node where we want to insert _after_
 	for i := 0; i < offset; i++ {
-		//fmt.Println(offset - i)
 		newNode = buckets[bi].backing[newNode].next
 	}
 
-	if edit {
-		// Insert new node
-		buckets[bi].backing = append(buckets[bi].backing, Node{element, buckets[bi].backing[newNode].next})
-		buckets[bi].backing[newNode].next = len(buckets[bi].backing) - 1
-		buckets[bi].size++
-		(*nToBucket)[element] = bi
-	}
+	// Insert new node
+	buckets[bi].backing = append(buckets[bi].backing, Node{element, buckets[bi].backing[newNode].next})
+	buckets[bi].backing[newNode].next = len(buckets[bi].backing) - 1
+	buckets[bi].size++
+	(*nToBucket)[element] = bi
 
 	return node, nodeBi, newNode, bi
-}
-
-func repositionNode(buckets Buckets, bi, offset, element int, nToBucket *map[int]int, mapping map[int]int) {
-	// count indices to get out of this bucket (and return early, if the element stays in this bucket!)
-
-	if offset == 0 {
-		return
-	}
-
-	getOffsetNode(buckets, bi, offset, element, nToBucket, mapping, true)
-
 }
 
 func mix(buckets Buckets, origNumbers []int, numberMapping map[int]int, nToBucket *map[int]int) Buckets {
 
 	for _, nn := range origNumbers {
 		bi := (*nToBucket)[nn]
-		//i := buckets[bi].Index(nn)
-		//nextBi := findBucket(buckets, i)
 		offset := numberMapping[nn]
 		if offset < 0 {
 			tmp := (-offset) % (len(origNumbers) - 1)
@@ -175,19 +146,9 @@ func mix(buckets Buckets, origNumbers []int, numberMapping map[int]int, nToBucke
 		}
 		offset = offset % (len(origNumbers) - 1)
 
-		//fmt.Printf("    %v (%v): bucket: %v, offset: %v\n", nn, numberMapping[nn], bi, offset)
-
-		//fmt.Printf("%v, offset: %v:\n", numberMapping[nn], offset)
-
-		repositionNode(buckets, bi, offset, nn, nToBucket, numberMapping)
-
-		// for _, b := range buckets {
-		// 	fmt.Printf("[%v] -> ", b.toString(numberMapping))
-		// }
-		// fmt.Printf("\n")
-		// fmt.Printf("\n")
-
-		//break
+		if offset != 0 {
+			repositionNode(buckets, bi, offset, nn, nToBucket, numberMapping)
+		}
 	}
 
 	return buckets
@@ -234,7 +195,7 @@ func main() {
 
 	//defer profile.Start(profile.ProfilePath(".")).Stop()
 
-	bucketSize := 100
+	bucketSize := 500
 	var buckets Buckets
 	buckets = append(buckets, newLinkedList(bucketSize))
 
@@ -255,8 +216,6 @@ func main() {
 			conv, _ = strconv.Atoi(v)
 			numberMapping[i] = conv
 			numberMapping2[i] = conv * 811589153
-			//numbers.Append(i)
-			//numbers2.Append(i)
 
 			if i != 0 && i%bucketSize == 0 {
 				buckets = append(buckets, newLinkedList(bucketSize))
@@ -273,26 +232,7 @@ func main() {
 			}
 		}
 	}
-	num0 = num0
-	mapping := numberMapping
-
-	// for _, b := range buckets {
-	// 	fmt.Printf("%v -> ", b.backing)
-	// }
-	// fmt.Printf("\n")
-	// fmt.Printf("\n")
-
-	// for _, b := range buckets {
-	// 	fmt.Printf("[%v] -> ", b.toString(mapping))
-	// }
-	// fmt.Printf("\n")
-	buckets = mix(buckets, origNumbers, mapping, &nToBucket)
-
-	// for _, b := range buckets {
-	// 	fmt.Printf("[%v] -> ", b.toString(mapping))
-	// }
-	// fmt.Printf("\n")
-
+	buckets = mix(buckets, origNumbers, numberMapping, &nToBucket)
 	fmt.Println(getSolution(buckets, num0, numberMapping, nToBucket, len(origNumbers)))
 
 	for i := 0; i < 10; i++ {
