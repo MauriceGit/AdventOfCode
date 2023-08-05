@@ -137,7 +137,7 @@ def manhatten_dist(p1, p2):
 # Returns a dictionary of number/letter -> direction vector. For reading direction strings directly.
 def direction_map(direction=None):
     if direction == None:
-        return dict(zip("RLUD", [(1,0), (-1,0), (0,1), (0,-1)]))
+        return dict(zip("RLDU", [(1,0), (-1,0), (0,1), (0,-1)]))
     return dict(zip(direction, [(1,0), (-1,0), (0,1), (0,-1)]))
 
 @lru_cache(maxsize=10)
