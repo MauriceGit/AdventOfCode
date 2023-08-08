@@ -5,7 +5,6 @@ sys.path.append('../General')
 from utility import *
 
 
-
 def main():
 
     lines = open_data("10.data")
