@@ -176,6 +176,26 @@ def calc_mirror_states(floors):
 
     return mirrors
 
+def heuristic(floors, steps):
+    #print((2**(chip_count*2*4)))
+    #print((floors & (2**(chip_count*2*4)-1)))
+    #print(steps<<((chip_count*2*4)-5))
+    #tmp = np.uint64(steps)<<np.uint64(((chip_count*2*4)-3))
+    #return (2**(chip_count*2*4)) - (floors & np.uint64(2**(chip_count*2*4)-1)) + tmp
+
+    #return steps
+
+    score = 0
+    penalty = 4
+    for i in range(chip_count * 4 * 2):
+        if i%(2*chip_count) == 0:
+            penalty -= 1
+        # 1*penalty for every microchip or generator that is on this floor!
+        score += (np.uint64(1<<i) & floors != 0) * (penalty**1.1)
+    return score + steps * 0.48
+
+# 58s: 1.0, 0.48
+# 38s: 1.1, 0.48
 
 def run(floors):
     global mc1_pattern
@@ -186,13 +206,13 @@ def run(floors):
     end_pos = np.uint64(2**(chip_count*2)-1) << np.uint64(3*chip_count*2)
     end_pos = set_elevator(end_pos, 3)
 
-    queue = [(0, floors)]
+    queue = [(heuristic(floors, 0), 0, floors)]
     heapify(queue)
     visited = set()
 
     while len(queue) > 0:
 
-        steps, state = heappop(queue)
+        h, steps, state = heappop(queue)
 
         if state in visited:
             continue
@@ -204,7 +224,7 @@ def run(floors):
         visited |= calc_mirror_states(state)
 
         for n in get_neighbors(state):
-            heappush(queue, (steps+1, n))
+            heappush(queue, (heuristic(n, steps+1), steps+1, n))
 
     return -1
 
