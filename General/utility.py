@@ -15,6 +15,11 @@ from json import loads
 
 from enum import Enum, IntEnum
 
+import hashlib
+# md5 = hashlib.md5()
+# md5.update("abc".encode())
+# h = md5.hexdigest()
+
 import re
 
 from copy import deepcopy
