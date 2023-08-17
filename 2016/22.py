@@ -4,10 +4,13 @@ import sys
 sys.path.append('../General')
 from utility import *
 
-def pp(cap, w, h, nodes):
+def pp(w, h, nodes):
     for y in range(h):
+        print("(" if y == 0 else " ", end="")
         for x in range(w):
-            print(f"{nodes[y*w+x]}/{cap[x,y]}\t", end="")
+            d = nodes[y*w+x]
+            c = "0" if d == 0 else ("G" if (x,y) == (w-1,0) else ("*" if (x,y) == (0,0) else "."))
+            print("#" if d > 400 else c, end=")" if (x,y) == (0,0) else " ")
         print()
 
 def main():
@@ -38,6 +41,7 @@ def main():
             pairs += i1 != i2 and u1 != 0 and u1 <= cap[i2]-u2
     print(pairs)
 
+    #pp(w, h, nodes)
     # Solved part2 by hand... (using the pp()-function above)
     # It needs 80 moves for the empty node to move to the adjacent node of our source.
     #   The only important thing here is, that there is a "wall" of 4xx nodes that are filled and can never be moved
