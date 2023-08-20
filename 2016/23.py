@@ -50,6 +50,7 @@ def interpreter(lines):
             case "jnz": commands.append(("i", lambda regs, a, b: num(regs, "i") if num(regs, a) == 0 else num(regs, "i")+num(regs, b)-1, c[1:], "jnz"))
             case "tgl": commands.append(("_", toggle, [commands, lines, c[1]], "tgl"))
             case "mul": commands.append((c[1], lambda regs, a, b: num(regs, a)*num(regs, b), c[2:], "mul"))
+            case "add": commands.append((c[1], lambda regs, a, b: num(regs, a)+num(regs, b), c[1:], "add"))
 
     for reg_0 in [7, 12]:
         regs = [0 for c in "abcdi_"]
