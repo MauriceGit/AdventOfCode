@@ -33,7 +33,7 @@ def main():
             ns[n] = maps[ns[n]][lr[i%len(lr)]]
         i += 1
 
-    print(reduce(lcm, lmap(lambda x: x[1]-x[0], final_index)))
+    print(math.lcm(*lmap(lambda x: x[1]-x[0], final_index)))
 
 
 if __name__ == "__main__":

@@ -43,8 +43,10 @@ from heapq import heapify, heappop, heappush
 # heappush(queue, (dist, new_pos))
 
 import math
-from math import sin, cos, ceil
+from math import sin, cos, ceil, lcm, gcd
 # example: math.ceil()
+# lcm can be used with a whole list of values, like:
+# lcm(2, 6) or lcm(*list_of_values)
 
 import itertools
 from itertools import repeat, chain, islice, accumulate, permutations, combinations, count, product
@@ -225,11 +227,6 @@ def dijkstra(start_pos, get_neighbors, state=None, edge_cost=None, end_pos=None,
 # compare like in C. -1, 0, 1
 def cmp(x1, x2):
     return 0 if x1 == x2 else 1 if x2-x1 > 0 else -1
-
-
-# Least common multiplier
-def lcm(a,b):
-    return (a*b)//math.gcd(a,b)
 
 def lmap(f, *iterables):
     return list(map(f, *iterables))
