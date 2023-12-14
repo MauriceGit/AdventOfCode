@@ -26,18 +26,19 @@ def move_left(cubes, rocks, r, len_x, len_y):
     return new_pos(cubes, rocks, ((x, r[1]) for x in range(r[0], -1, -1)))
 
 def tilt(cubes, rocks, len_x, len_y, sorter, move):
-    new_rocks = set()
-    for r in sorted(rocks, key=sorter[0], reverse=sorter[1]):
-        new_rocks.add(move(cubes, rocks.union(new_rocks), r, len_x, len_y))
-        rocks.remove(r)
-    return new_rocks
+    for r in sorted(rocks.keys(), key=sorter[0], reverse=sorter[1]):
+        tmp = move(cubes, rocks, r, len_x, len_y)
+        if tmp != r:
+            del rocks[r]
+            rocks[tmp] = 1
+    return rocks
 
-# are there rocks that don't move each cycle? Can we make rocks to cubes?
+
 def execute_cycle(cubes, rocks, len_x, len_y):
-    rocks = tilt(cubes, rocks, len_x, len_y, (itemgetter(1, 0), False), move_up)
-    rocks = tilt(cubes, rocks, len_x, len_y, (itemgetter(0, 1), False), move_left)
-    rocks = tilt(cubes, rocks, len_x, len_y, (itemgetter(1, 0), True), move_down)
-    rocks = tilt(cubes, rocks, len_x, len_y, (itemgetter(0, 1), True), move_right)
+    tilt(cubes, rocks, len_x, len_y, (itemgetter(1, 0), False), move_up)
+    tilt(cubes, rocks, len_x, len_y, (itemgetter(0, 1), False), move_left)
+    tilt(cubes, rocks, len_x, len_y, (itemgetter(1, 0), True), move_down)
+    tilt(cubes, rocks, len_x, len_y, (itemgetter(0, 1), True), move_right)
     return rocks
 
 
@@ -46,33 +47,33 @@ def main():
     lines = open_data("14.data")
 
     cubes = set()
-    rocks = set()
+    rocks = dict()
     for y,line in enumerate(lines):
         for x,c in enumerate(line):
             if c == "#":
                 cubes.add((x,y))
             elif c == "O":
-                rocks.add((x,y))
+                rocks[(x,y)] = 1
 
     len_x = len(lines[0])
     len_y = len(lines)
 
     print(sum(map(lambda x: len(lines)-x[1], tilt(cubes, rocks.copy(), len_x, len_y, (itemgetter(1, 0), False), move_up))))
 
-    cache = dict()
+    cache = set()
     cycle = []
     for i in range(1000000000):
 
-        if tuple(rocks) in cache:
-            cycle.append((i, sum(map(lambda x: len(lines)-x[1], rocks))))
+        if tuple(rocks.keys()) in cache:
+            cycle.append((i, sum(map(lambda x: len(lines)-x[1], rocks.keys()))))
 
             c1 = lmap(itemgetter(1), cycle[:len(cycle)//2])
             c2 = lmap(itemgetter(1), cycle[len(cycle)//2:])
 
-            if len(cycle)%2==0 and c1 == c2:
+            if len(cycle) > 10 and len(cycle)%2==0 and c1 == c2:
                 break
         else:
-            cache[tuple(rocks)] = True
+            cache.add(tuple(rocks.keys()))
 
         rocks = execute_cycle(cubes, rocks, len_x, len_y)
 
