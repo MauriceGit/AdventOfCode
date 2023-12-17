@@ -10,10 +10,11 @@ def solve(lines, min_steps, max_steps):
     start = Pos((0,0), (1,0), 0)
     target = (len(lines[0])-1, len(lines)-1)
 
-    def edge_cost(state, pos, next_pos):
-        if not (0 <= next_pos.p[0] < len(state) and 0 <= next_pos.p[1] < len(state[0])):
+    def edge_cost(state, p, np):
+        if not (0 <= np.p[0] < len(state) and 0 <= np.p[1] < len(state[0])):
             return 999999999999
-        return state[next_pos.p[1]][next_pos.p[0]]
+
+        return state[np.p[1]][np.p[0]]
 
     def get_neighbors(state, pos):
 
