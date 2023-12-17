@@ -15,7 +15,7 @@ def solve(lines, min_steps, max_steps):
             return 999999999999
         return state[next_pos.p[1]][next_pos.p[0]]
 
-    def get_neighbors(state, pos, path):
+    def get_neighbors(state, pos):
 
         if pos.count < min_steps:
             yield Pos(add(pos.p, pos.d), pos.d, pos.count+1)
