@@ -92,7 +92,7 @@ from networkx.algorithms.shortest_paths.weighted import single_source_dijkstra
 #
 
 from threading import Thread
-from queue import Queue
+from queue import Queue, SimpleQueue
 #
 # t = Thread(target=function, args=())
 # t.start()
