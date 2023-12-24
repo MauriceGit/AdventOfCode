@@ -43,7 +43,7 @@ def main():
                     graph.add_edge((x,y), new_p)
 
     print(max(map(len, nx.all_simple_paths(graph, start_pos, end_pos)))-1)
-
+    return
 
     reduced_field = dict()
     for p in f:
@@ -67,7 +67,11 @@ def main():
     def get_path_length(path):
         return sum(distances[(path[i-1], path[i])] for i in range(1, len(path)))
 
-    print(max(map(get_path_length, nx.all_simple_paths(graph, start_pos, end_pos))))
+    from_start = distances[(start_pos, reduced_field[start_pos][0])]
+    to_end     = distances[(end_pos  , reduced_field[end_pos][0])]
+
+    max_dist = max(map(get_path_length, nx.all_simple_paths(graph, reduced_field[start_pos][0], reduced_field[end_pos][0])))
+    print(max_dist + from_start + to_end)
 
 
 
