@@ -10,13 +10,10 @@ def connected(f, p1, p2, branches):
     nodes = set(branches.keys())
 
     def get_neighbors(state, pos):
-        positions = []
         for d in dir_list_4():
             new_p = add(pos, d)
-            if new_p in state and state[new_p] != "#":
-                if new_p not in nodes-{p1,p2}:
-                    positions.append(new_p)
-        return positions
+            if new_p in state and state[new_p] != "#" and new_p not in nodes-{p1,p2}:
+                yield new_p
 
     return dijkstra(p1, get_neighbors, end_pos=p2, state=f, use_path=True)[1]
 
@@ -43,7 +40,6 @@ def main():
                     graph.add_edge((x,y), new_p)
 
     print(max(map(len, nx.all_simple_paths(graph, start_pos, end_pos)))-1)
-    return
 
     reduced_field = dict()
     for p in f:
@@ -72,7 +68,6 @@ def main():
 
     max_dist = max(map(get_path_length, nx.all_simple_paths(graph, reduced_field[start_pos][0], reduced_field[end_pos][0])))
     print(max_dist + from_start + to_end)
-
 
 
 if __name__ == "__main__":

@@ -36,14 +36,14 @@ def main():
     #    That means, that the other two critical edges ore on the two paths we just found! (could be an optimization...)
     critical_edges = []
     for (n1, n2) in edges:
-        exclude_edges = []
+        exclude_edges = [(n1, n2)]
         count = 0
-        for i in range(4):
+        for i in range(3):
             path = find_path(graph, n1, n2, exclude_edges)
             if path is not None:
                 exclude_edges.extend([(path[i-1], path[i]) for i in range(1, len(path))])
                 count += 1
-        if count <= 3:
+        if count <= 2:
             critical_edges.append((n1, n2))
 
     for (n1, n2) in critical_edges:
@@ -57,4 +57,4 @@ if __name__ == "__main__":
 
 # year 2023
 # solution for 25.01: 598120
-# solution for 25.02: ?
+# solution for 25.02: *
