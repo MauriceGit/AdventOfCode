@@ -20,3 +20,6 @@
 
 # 2017:
 ![Overview](2017/aoc_17.png)
+
+# 2016:
+![Overview](2017/aoc_16.png)
