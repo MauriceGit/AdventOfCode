@@ -22,4 +22,4 @@
 ![Overview](2017/aoc_17.png)
 
 # 2016:
-![Overview](2017/aoc_16.png)
+![Overview](2016/aoc_16.png)
