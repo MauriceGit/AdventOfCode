@@ -187,12 +187,15 @@ def add_surrounding_edge(graph, p):
     add_edge(graph, p, (0,-1))
 
 
-# get_neighbors:    Function with state and current_pos as parameters: get_neighbors(state, pos)
+# get_neighbors:    Function with state and current_pos as parameters:
+#                   get_neighbors(state, pos)
 # state:            Most likely just the field that contains the graph. Could also be a tuple that contains more information!
-# edge_cost:        Function with state, current_pos and next_pos as parameters: edge_cost(state, pos, next_pos)
+# edge_cost:        Function with state, current_pos and next_pos as parameters:
+#                   edge_cost(state, pos, next_pos)
 # visit:            Function that gets called for every single node that gets reached (with minimum distance).
-#                   It expects state, pos, dist and path as parameters: visit(state, pos, dist, path)
-#                   visit() should return True to continue searching and False to stop visiting further nodes!
+#                   It expects state, pos, dist and path as parameters:
+#                   visit() should return True to continue searching and False to stop visiting further nodes
+#                   visit(state, pos, dist, path)
 # use_path:         True, if you need the actual shortest path from start to end. Will impact runtime!
 #                   Otherwise, the returned path will always be []
 def dijkstra(start_pos, get_neighbors, state=None, edge_cost=None, end_pos=None, visit=None, use_path=False, revisit_nodes=False):
