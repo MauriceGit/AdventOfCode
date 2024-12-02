@@ -49,8 +49,10 @@ from math import sin, cos, ceil, lcm, gcd
 # lcm(2, 6) or lcm(*list_of_values)
 
 import itertools
-from itertools import repeat, chain, islice, accumulate, permutations, combinations, count, product
+from itertools import repeat, chain, islice, accumulate, permutations, combinations, count, product, pairwise
 # examples:
+#
+# pairwise('ABCDEFG') --> AB BC CD DE EF FG
 #
 # accumulate([1,2,3,4,5]) --> 1 3 6 10 15
 #
