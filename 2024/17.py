@@ -4,45 +4,8 @@ import sys
 sys.path.append('../General')
 from utility import *
 
-def combo(regs, operand):
-    if operand <= 3:
-        return operand
-    return regs[operand-4]
 
-def run(regs, prog):
-    instr = 0
-    out = []
-    while instr < len(prog):
-
-        op = prog[instr]
-        operand = prog[instr+1]
-        incr = 2
-
-        match op:
-            case 0:  # adv
-                regs[0] = regs[0] // 2**combo(regs, operand)
-            case 1:  # bxl
-                regs[1] = regs[1] ^ operand
-            case 2:  # bst
-                regs[1] = combo(regs, operand) % 8
-            case 3:  # jnz
-                if regs[0] != 0:
-                    instr = operand
-                    incr = 0
-            case 4:  # bxc
-                regs[1] = regs[1] ^ regs[2]
-            case 5:  # out
-                out.append(combo(regs, operand)%8)
-            case 6:  # bdv
-                regs[1] = regs[0] // 2**combo(regs, operand)
-            case 7:  # cdv
-                regs[2] = regs[0] // 2**combo(regs, operand)
-        instr += incr
-
-    return ",".join(map(str, out))
-
-
-def run2(a):
+def run(a):
     l = []
     while a > 0:
         # last 3 bits with the first bit flipped
@@ -65,7 +28,7 @@ def try_combinations(number, expected):
 
     for i in range(8):
         tmp = number + bin(i)[2:].zfill(3)
-        if run2(int(tmp, 2))[0] == expected[-1]:
+        if run(int(tmp, 2))[0] == expected[-1]:
             if (res := try_combinations(tmp, expected[:-1])) is not None:
                 return res
 
@@ -78,7 +41,7 @@ def main():
     regs = lmap(lambda x: x[0], map(ints, regs))
     prog = ints(prog[0])
 
-    print(",".join(map(str, run2(regs[0]))))
+    print(",".join(map(str, run(regs[0]))))
     print(try_combinations("100", prog[:-1]))
 
 
