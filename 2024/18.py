@@ -9,10 +9,7 @@ def main():
 
     lines = open_data("18.data")
 
-    width, height = 71, 71
-    pos = (0, 0)
-    end = (width-1, height-1)
-
+    width, height = 70, 70
     corrupted = dict()
     for x,y in map(ints, lines[:1024]):
         corrupted[(x,y)] = "#"
@@ -27,10 +24,10 @@ def main():
         def get_neighbors(state, pos):
             for d in dir_list_4():
                 tmp = add(pos, d)
-                if 0 <= tmp[0] < width and 0 <= tmp[1] < height and tmp not in corrupted:
+                if 0 <= tmp[0] <= width and 0 <= tmp[1] <= height and tmp not in corrupted:
                     yield tmp
 
-        _, dist, path = dijkstra(pos, get_neighbors, end_pos=end, use_path=True)
+        _, dist, path = dijkstra((0, 0), get_neighbors, end_pos=(width, height), use_path=True)
         if i == 0:
             print(dist)
         if dist is None:
