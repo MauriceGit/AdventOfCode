@@ -4,6 +4,7 @@ import sys
 sys.path.append('../General')
 from utility import *
 
+from scipy.spatial import KDTree
 
 
 def main():
@@ -42,15 +43,12 @@ def main():
                 c += 1
     print(c)
 
-    c = 0
-    for i in range(0, len(path)):
-        p1 = path[i]
-        for j in range(i+100, len(path)):
-            p2 = path[j]
-            md = manhatten_dist(p1, p2)
-            if md <= 20 and dists[p1]-dists[p2] >= 100+md:
-                c += 1
-    print(c)
+    tree = KDTree(path)
+    count = 0
+    for i, p in enumerate(path):
+        _dists, _indices = tree.query(p, k=600, p=1, distance_upper_bound=21)
+        count += sum(i<=ii<=dist and dists[p]-dists[path[ii]] >= 100+int(_dists[j]) for j,ii in enumerate(_indices))
+    print(count)
 
 
 if __name__ == "__main__":
