@@ -39,68 +39,73 @@ def all_numpad_paths(code):
     return paths
 
 
-def all_dirpad_paths(code):
+@lru_cache(maxsize=100)
+def dirs(seq):
     pad = {(1,0):"^", (2,0):"A", (0,1):"<", (1,1):"v", (2,1):">"}
     rev_pad = {v:k for k,v in pad.items()}
 
-    pos = (2,0)
-    paths = set([""])
-    for c in code:
+    all_out = [""]
 
+    pos = (2,0)
+    for c in seq:
         diff = sub(rev_pad[c], pos)
         dx = ("<" if diff[0] < 0 else ">") * abs(diff[0])
         dy = ("^" if diff[1] < 0 else "v") * abs(diff[1])
-        new_paths_1 = set()
-        new_paths_2 = set()
+        p1 = ""
+        p2 = ""
         if check_path(pos, dx+dy, (0,0)):
-            new_paths_1 = {p+dx+dy+"A" for p in paths}
+            p1 = dx+dy+"A"
         if check_path(pos, dy+dx, (0,0)):
-            new_paths_2 = {p+dy+dx+"A" for p in paths}
+            p2 = dy+dx+"A"
 
-        paths = new_paths_1 | new_paths_2
+        if diff != (0, 0):
+            _out1, _out2 = [], []
+            if p1 != "":
+                _out1 = [p+p1 for p in all_out]
+            if p2 != "":
+                _out2 = [p+p2 for p in all_out]
+            all_out = _out1 + _out2
+        else:
+            all_out = [p+"A" for p in all_out]
 
         pos = rev_pad[c]
-    return paths
+
+    return lmap(lambda x: lmap(lambda y: y+"A", x), map(lambda x: x.split("A")[:-1], all_out))
+
+@lru_cache(maxsize=10000000000)
+def solve_seq(seq, req):
+    if req == 0:
+        return len(seq)
+
+    possible_next_sequences = dirs(seq)
+    best_sequence = 100000000000000000000000
+    for next_seq in possible_next_sequences:
+        count = sum(solve_seq(n, req-1) for n in next_seq)
+        best_sequence = min(best_sequence, count)
+
+    return best_sequence
 
 
-def all_paths(paths):
-    out = []
-    for p in paths:
-        out.extend(all_dirpad_paths(p))
-    return out
+# sequence: [str]
+def solve(sequence):
+    return sum(solve_seq(seq, 25) for seq in sequence)
 
-def rec_all_paths(paths, rec):
-    if rec == 0:
-        return paths
-    return rec_all_paths(all_paths(paths), rec-1)
 
 def main():
 
     codes = open_data("21.data")
-    #c = codes[:1][0]
 
-    #for c in codes:
-    #    print(all_numpad_paths(c))
-    #
-    #
-    #return
-
-    complexity = 0
+    sum_all = 0
     for c in codes:
-        #print(lmap(len, all_paths(all_paths(all_numpad_paths(c)))))
-        tmp = all_paths(all_paths(all_paths(all_numpad_paths(c)))[:1])
-        print(tmp[0])
-        complexity += int(c[:-1]) * min(map(len, tmp))
-        #complexity += int(c[:-1]) * min(map(len, rec_all_paths(all_numpad_paths(c), 3)))
-    print(complexity)
-
-
-
+        tmp = lmap(lambda x: lmap(lambda y: y+"A", x), map(lambda x: x.split("A")[:-1], all_numpad_paths(c)))
+        s = min(solve(sequence) for sequence in tmp)
+        sum_all += s * int(c[:-1])
+    print(sum_all)
 
 
 if __name__ == "__main__":
     main()
 
 # year 2024
-# solution for 21.01: ?
-# solution for 21.02: ?
+# solution for 21.01: 138764
+# solution for 21.02: 169137886514152
