@@ -17,93 +17,82 @@ def part1(inputs, ops):
     return int("".join([str(int(inputs[k])) for k in sorted(filter(lambda x: x.startswith("z"), inputs.keys()), key=lambda x: int(x[1:]), reverse=True)]), 2)
 
 
-def pp_(inputs, ops, n):
+def switch1(a):
+    return a
 
-    if n in inputs:
-        return f"{n}"
-
-    o, a, b = ops[n]
-    op = ""
-    match o:
-        case operator.and_:
-            op = "&"
-        case operator.or_:
-            op = "|"
-        case operator.xor:
-            op = "^"
-
-    print(f"{n} = {a} {op} {b}")
-    return f"({pp_(inputs, ops, a)} {op} {pp_(inputs, ops, b)})"
-
-def pp(inputs, ops, n):
-    print(pp_(inputs, ops, n))
-
-
-# carryover is the OR leftover from the n-1 operation
-def calc_bit_n(ops, ops_or, ops_and, ops_xor, n, carryover):
-
-    wrong_nodes = []
-
-    new_carryover = None
-
+# Nodes we know: xn, yn, zn, carryover. xn, yn and carryover are known to be good!
+# We need 4 more nodes!
+# Returns: (nodes, new_carryover, everything_ok)
+# new_carryover can be wrong, if everything_ok is False.
+def test_bit_n(ops, ops_or, ops_and, ops_xor, n, carryover, switch=switch1):
     xn, yn, zn = "x"+n, "y"+n, "z"+n
 
-    xy_xor = ops_xor[(xn, yn)]
-    xy_and = ops_and[(xn, yn)]
+    xy_xor = switch(ops_xor[(xn, yn)])
+    xy_and = switch(ops_and[(xn, yn)])
 
-    # zn is always the xor of the carryover and xn^yn
-    op, a, b = ops[zn]
-    if op != operator.xor or (a != carryover and b != carryover):
-        print(f"wrong: {zn}")
-        wrong_nodes.append(zn)
-        print(f"({xy_xor}, {carryover})")
-        wrong_nodes.append(ops_xor[(xy_xor, carryover)])
-        print("Wrong Nodes: ", wrong_nodes)
+    op, a, b = ops[switch(zn)]
+    if op != operator.xor or carryover not in (a, b) or xy_xor not in (a, b):
+        return None, False
 
-    def switch(n):
-        if n in wrong_nodes:
-            return wrong_nodes[0] if n == wrong_nodes[1] else wrong_nodes[1]
-        return n
-
+    if (carryover, xy_xor) not in ops_and:
+        return None, False
 
     second_and = switch(ops_and[(carryover, xy_xor)])
 
-    #print(f"second_and: {second_and}")
+    if (xy_and, second_and) not in ops_or:
+        return None, False
 
-    new_carryover = switch(ops_or[(second_and, switch(xy_and))])
+    return switch(ops_or[(xy_and, second_and)]), True
 
-    #print(f"new carryover: {new_carryover}")
+# We can go 2 levels deep and collect EVERY node. That should get us all relevant nodes...
+def collect_nodes(ops, ops_or, ops_and, ops_xor, n, carryover):
+    xn, yn, zn = "x"+n, "y"+n, "z"+n
+    nodes = {xn, yn}
 
-    return new_carryover, wrong_nodes
+    xy_xor = ops_xor[(xn, yn)]
+    xy_and = ops_and[(xn, yn)]
+    nodes.add(xy_xor)
+    nodes.add(xy_and)
 
+    l1_nodes = set()
 
+    for op in (ops_or, ops_and, ops_xor):
+        if (xy_xor, carryover) in op:
+            node = op[(xy_xor, carryover)]
+            nodes.add(node)
+            l1_nodes.add(node)
 
-
-    and_ = ops_and[("x"+n, "y"+n)]
-    xor_ = ops_xor[("x"+n, "y"+n)]
-
-    # this should result in zn
-    zn = ops_xor[(carryover, xor_)]
-    #print(zn)
-
-    and2_ = ops_and[(carryover, xor_)]
-
-    # this is the new carryover for n+1
-    or_ = ops_or[(and_, and2_)]
-
-    return or_, []
+    for op in (ops_or, ops_and, ops_xor):
+        for next_node in l1_nodes:
+            if (next_node, xy_and) in op:
+                nodes.add(op[(next_node, xy_and)])
+    return nodes
 
 
 def calc_bits(ops, ops_or, ops_and, ops_xor):
-
+    wrong_nodes = []
     carryover = ops_and[("x00", "y00")]
-    for i in range(1, 46):
+    for i in range(1, 48):
         n = f"{i:02d}"
+        xn, yn = "x"+n, "y"+n
 
-        carryover, _ = calc_bit_n(ops, ops_or, ops_and, ops_xor, n, carryover)
+        if (xn, yn) not in ops_xor:
+            break
 
+        nodes = collect_nodes(ops, ops_or, ops_and, ops_xor, n, carryover)
+        new_carryover, ok = test_bit_n(ops, ops_or, ops_and, ops_xor, n, carryover)
+        if not ok:
+            for (a,b) in combinations(nodes - {xn, yn}, 2):
+                switch2 = lambda x: x if x not in (a, b) else (a if x==b else b)
+                new_carryover, ok = test_bit_n(ops, ops_or, ops_and, ops_xor, n, carryover, switch=switch2)
+                if ok:
+                    carryover = new_carryover
+                    wrong_nodes.extend([a, b])
+                    break
+        else:
+            carryover = new_carryover
 
-
+    return ",".join(sorted(wrong_nodes))
 
 
 def main():
@@ -129,35 +118,22 @@ def main():
         o = {"AND": operator.and_, "OR": operator.or_, "XOR": operator.xor}[op]
         ops[res] = (o, a, b)
 
-        match op:
-            case "AND":
-                ops_and[(a,b)] = res
-                ops_and[(b,a)] = res
-            case "OR":
-                ops_or[(a,b)] = res
-                ops_or[(b,a)] = res
-            case "XOR":
-                ops_xor[(a,b)] = res
-                ops_xor[(b,a)] = res
+        _ops = {"AND": ops_and, "OR": ops_or, "XOR": ops_xor}[op]
+        _ops[(a,b)] = res
+        _ops[(b,a)] = res
 
-        c = {"AND": "r", "OR": "b", "XOR": "g"}[op]
-        G.add_edge(a, res, color=c)
-        G.add_edge(b, res, color=c)
+        if False:
+            c = {"AND": "r", "OR": "b", "XOR": "g"}[op]
+            G.add_edge(a, res, color=c)
+            G.add_edge(b, res, color=c)
 
     print(part1(inputs.copy(), ops.copy()))
 
-    #pp(inputs, ops, "z00")
-    #pp(inputs, ops, "z01")
-    #pp(inputs, ops, "z02")
-    #pp(inputs, ops, "z03")
+    print(calc_bits(ops, ops_or, ops_and, ops_xor))
 
-
-    #calc_bit_n(inputs, ops, ops_or, ops_and, ops_xor, 1, None)
-    calc_bits(ops, ops_or, ops_and, ops_xor)
-
+    # Draw the graph to get an initial overview of node structure!
     if False:
         colors = nx.get_edge_attributes(G,'color').values()
-
         pos = nx.kamada_kawai_layout(G)
         nx.draw(G, pos,
                 edge_color=colors,
@@ -171,5 +147,5 @@ if __name__ == "__main__":
     main()
 
 # year 2024
-# solution for 24.01: ?
-# solution for 24.02: ?
+# solution for 24.01: 59619940979346
+# solution for 24.02: bpt,fkp,krj,mfm,ngr,z06,z11,z31
