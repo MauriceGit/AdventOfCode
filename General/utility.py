@@ -131,6 +131,9 @@ def div(p, f):
 def length(p):
     return math.sqrt(sum(p[i]*p[i] for i in range(len(p))))
 
+def length_squared(p):
+    return sum(p[i]*p[i] for i in range(len(p)))
+
 def rad_to_deg(a):
     return a*180/math.pi
 
