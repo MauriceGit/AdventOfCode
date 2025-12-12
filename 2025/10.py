@@ -3,7 +3,6 @@
 import sys
 sys.path.append('../General')
 from utility import *
-#from sympy import symbols, solve, Eq
 import pulp
 
 
@@ -34,14 +33,17 @@ def press_button_p1(machine):
 
 def solve_with_solver(m):
 
-    # Define problem: minimize a + b + c + d + e + f
+    # Define problem: minimize the overall button clicks
     prob = pulp.LpProblem("MinimizeSum", pulp.LpMinimize)
 
+    # A variable for each button. Can not be negative and needs to be an integer.
     variables = [pulp.LpVariable(str(i), lowBound=0, cat='Integer') for i in range(len(m.buttons))]
 
-    # Objective
+    # Objective - this is the main thing. We want to minimize the overall
+    # button clicking. So the sum of all buttons need to be minimized.
     prob += sum(variables)
 
+    # Add the equations
     for i, joltage in enumerate(m.joltage):
         prob += sum(variables[bi] for bi, b in enumerate(m.buttons) if i in b) == joltage
 
