@@ -1,5 +1,8 @@
 ## Advent of Code implementations
 
+# 2025:
+![Overview](2025/aoc_25.png)
+
 # 2024:
 ![Overview](2024/aoc_24.png)
 
